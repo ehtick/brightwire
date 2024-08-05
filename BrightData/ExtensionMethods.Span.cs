@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1420,7 +1421,7 @@ namespace BrightData
         public static T AngularDistance<T>(this ReadOnlySpan<T> v1, ReadOnlySpan<T> v2)
             where T : unmanaged, IBinaryFloatingPointIeee754<T>
         {
-            return (T.One - T.Acos(CosineDistance(v1, v2))) / T.Pi;
+            return T.Acos(T.One - CosineDistance(v1, v2)) / T.Pi;
         }
 
         /// <summary>
@@ -1617,6 +1618,73 @@ namespace BrightData
                 CacheTranspose(from, rows, columns, rb, re, cb, cb + (c / 2), to);
                 CacheTranspose(from, rows, columns, rb, re, cb + (c / 2), ce, to);
             }
+        }
+
+        /// <summary>
+        /// Returns the index of each element of span, ordered from lowest to highest
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static uint[] GetRankedIndices<T>(this ReadOnlySpan<T> span) where T : unmanaged, INumber<T>
+        {
+            var len = span.Length;
+            using var temp = SpanOwner<T>.Allocate(len);
+            var copy = temp.Span;
+            span.CopyTo(copy);
+
+            using var indices = SpanOwner<uint>.Allocate(len);
+            var indicesSpan = indices.Span;
+            for (var i = 0; i < len; i++)
+                indicesSpan[i] = (uint)i;
+            
+            copy.Sort(indicesSpan);
+
+            var ret = len.AsRange().ToArray();
+            for(var i = 0; i < len; i++)
+                ret[indicesSpan[i]] = (uint)i;
+            return ret;
+        }
+
+        /// <summary>
+        /// Returns the index of each element of span, ordered from lowest to highest
+        /// </summary>
+        /// <param name="span"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static uint[] GetRankedIndices<T>(this Span<T> span) where T : unmanaged, INumber<T> => GetRankedIndices((ReadOnlySpan<T>)span);
+
+        public static AT NIndices<T, AT>(this ReadOnlySpan<T> span)
+            where AT: IFixedSizeSortedArray<uint, T>, new()
+        {
+            var ret = new AT();
+            for (int i = 0, len = span.Length; i < len; i++)
+                ret.TryAdd((uint)i, span[i]);
+            return ret;
+        }
+
+        public static MemoryOwner<T> EuclideanNormalize<T>(this ReadOnlySpan<T> span)
+            where T : unmanaged, IBinaryFloatingPointIeee754<T>
+        {
+            var magnitude = span.L2Norm();
+            if (magnitude == T.Zero) {
+                var ret = Allocate<T>((uint)span.Length, false);
+                span.CopyTo(ret.Span);
+                return ret;
+            }
+            return span.Multiply(T.One / magnitude);
+        }
+
+        public static MemoryOwner<T> ManhattanNormalize<T>(this ReadOnlySpan<T> span)
+            where T : unmanaged, IBinaryFloatingPointIeee754<T>
+        {
+            var magnitude = span.L1Norm();
+            if (magnitude == T.Zero) {
+                var ret = Allocate<T>((uint)span.Length, false);
+                span.CopyTo(ret.Span);
+                return ret;
+            }
+            return span.Multiply(T.One / magnitude);
         }
 
         /// <summary>

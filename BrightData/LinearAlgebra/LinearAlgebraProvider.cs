@@ -9,6 +9,7 @@ using BrightData.Helper;
 using BrightData.LinearAlgebra.ReadOnly;
 using BrightData.LinearAlgebra.Segments;
 using CommunityToolkit.HighPerformance.Buffers;
+using static BrightData.DataTable.ColumnOrientedDataTable;
 
 namespace BrightData.LinearAlgebra
 {
@@ -118,6 +119,13 @@ namespace BrightData.LinearAlgebra
         public virtual INumericSegment<T> CreateSegment(params T[] data) => new MutableTensorSegment<T>(data);
 
         /// <summary>
+        /// Creates a tensor segment from an existing segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public virtual INumericSegment<T> CreateSegment(IReadOnlyNumericSegment<T> segment) => new MutableTensorSegment<T>(segment.ToNewArray());
+
+        /// <summary>
         /// Creates a tensor segment
         /// </summary>
         /// <param name="size">Segment size</param>
@@ -183,7 +191,7 @@ namespace BrightData.LinearAlgebra
         public IVector<T> CreateVector(uint size, bool initialiseToZero) => CreateVector(CreateSegment(size, initialiseToZero));
 
         /// <summary>
-        /// Creates a vector from an array of floats
+        /// Creates a vector from an array of values
         /// </summary>
         /// <param name="data">T array</param>
         /// <returns></returns>
@@ -198,7 +206,7 @@ namespace BrightData.LinearAlgebra
         public IVector<T> CreateVector(uint size, T value) => CreateVector(size, _ => value);
 
         /// <summary>
-        /// Creates a vector from a span of floats
+        /// Creates a vector from a span of values
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -206,6 +214,18 @@ namespace BrightData.LinearAlgebra
         {
             var segment = CreateSegment((uint)span.Length, false);
             segment.CopyFrom(span);
+            return CreateVector(segment);
+        }
+
+        /// <summary>
+        /// Creates a vector from a memory block of values
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public IVector<T> CreateVector(ReadOnlyMemory<T> memory)
+        {
+            var segment = CreateSegment((uint)memory.Length, false);
+            segment.CopyFrom(memory.Span);
             return CreateVector(segment);
         }
 
@@ -790,7 +810,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor2"></param>
         /// <returns></returns>
         public virtual INumericSegment<T> Add(IReadOnlyNumericSegment<T> tensor, IReadOnlyNumericSegment<T> tensor2) => 
-            tensor.ApplyReadOnlySpans(tensor2, (x, y) => x.Add(y)).ToSegment();
+            tensor.ReduceReadOnlySpans(tensor2, (x, y) => x.Add(y)).ToSegment();
 
         /// <summary>
         /// Adds two tensors into a new tensor and applies coefficients to each element in the two tensors
@@ -801,7 +821,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="coefficient2"></param>
         /// <returns></returns>
         public virtual INumericSegment<T> Add(IReadOnlyNumericSegment<T> tensor, IReadOnlyNumericSegment<T> tensor2, T coefficient1, T coefficient2) =>
-            tensor.ApplyReadOnlySpans(tensor2, (x, y) => x.Add(y, coefficient1, coefficient2)).ToSegment();
+            tensor.ReduceReadOnlySpans(tensor2, (x, y) => x.Add(y, coefficient1, coefficient2)).ToSegment();
 
         /// <summary>
         /// Creates a new tensor from adding a scalar to each element in the tensor 
@@ -855,7 +875,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual INumericSegment<T> Subtract(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.Subtract(y)).ToSegment();
+        public virtual INumericSegment<T> Subtract(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.Subtract(y)).ToSegment();
 
         /// <summary>
         /// Subtracts the second tensor from the first tensor into a new tensor and applies coefficients to each value in each tensor
@@ -865,7 +885,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="coefficient1">Coefficient to apply to each element in the first tensor</param>
         /// <param name="coefficient2">Coefficient to apply to each element in the second tensor</param>
         /// <returns></returns>
-        public virtual INumericSegment<T> Subtract(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2, T coefficient1, T coefficient2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.Subtract(y, coefficient1, coefficient2)).ToSegment();
+        public virtual INumericSegment<T> Subtract(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2, T coefficient1, T coefficient2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.Subtract(y, coefficient1, coefficient2)).ToSegment();
 
         /// <summary>
         /// Subtracts the second tensor from the first tensor - first tensor modified in place
@@ -889,7 +909,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual INumericSegment<T> PointwiseMultiply(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.PointwiseMultiply(y)).ToSegment();
+        public virtual INumericSegment<T> PointwiseMultiply(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.PointwiseMultiply(y)).ToSegment();
 
         /// <summary>
         /// Multiplies each element in the first tensor with the corresponding value in the second tensor - first tensor modified in place
@@ -904,7 +924,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual INumericSegment<T> PointwiseDivide(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.PointwiseDivide(y)).ToSegment();
+        public virtual INumericSegment<T> PointwiseDivide(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.PointwiseDivide(y)).ToSegment();
 
         /// <summary>
         /// Dividing each element in the first tensor with the corresponding value in the second tensor - first tensor is modified in place
@@ -919,7 +939,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1"></param>
         /// <param name="tensor2"></param>
         /// <returns></returns>
-        public virtual T DotProduct(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.DotProduct(y));
+        public virtual T DotProduct(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.DotProduct(y));
 
         /// <summary>
         /// Creates a new tensor that contains the square root of each value in this tensor
@@ -1021,7 +1041,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual T CosineDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.CosineDistance(y));
+        public virtual T CosineDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.CosineDistance(y));
 
         /// <summary>
         /// Finds the euclidean distance between the first and second tensor
@@ -1029,7 +1049,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual T EuclideanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.EuclideanDistance(y));
+        public virtual T EuclideanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.EuclideanDistance(y));
 
         /// <summary>
         /// Finds the mean squared distance between the first and second tensor
@@ -1037,7 +1057,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual T MeanSquaredDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.MeanSquaredDistance(y));
+        public virtual T MeanSquaredDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.MeanSquaredDistance(y));
 
         /// <summary>
         /// Finds the squared euclidean distance between the first and second tensor
@@ -1045,7 +1065,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual T SquaredEuclideanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.SquaredEuclideanDistance(y));
+        public virtual T SquaredEuclideanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.SquaredEuclideanDistance(y));
 
         /// <summary>
         /// Finds the manhattan distance between the first and second tensor
@@ -1053,7 +1073,7 @@ namespace BrightData.LinearAlgebra
         /// <param name="tensor1">First tensor</param>
         /// <param name="tensor2">Second tensor</param>
         /// <returns></returns>
-        public virtual T ManhattanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ApplyReadOnlySpans(tensor2, (x, y) => x.ManhattanDistance(y));
+        public virtual T ManhattanDistance(IReadOnlyNumericSegment<T> tensor1, IReadOnlyNumericSegment<T> tensor2) => tensor1.ReduceReadOnlySpans(tensor2, (x, y) => x.ManhattanDistance(y));
 
         /// <summary>
         /// Creates a new tensor that contains the absolute value of each element in this tensor
@@ -1207,10 +1227,10 @@ namespace BrightData.LinearAlgebra
         /// <param name="compareTo">Second set of vectors</param>
         /// <param name="distanceMetric">Distance metric</param>
         /// <returns>Matrix with the rows corresponding to the first set and columns corresponding to the second set and each element containing the distance</returns>
-        public virtual IMatrix<T> FindDistances(IVector<T>[] vectors, IReadOnlyList<IVector<T>> compareTo, DistanceMetric distanceMetric)
+        public virtual IMatrix<T> FindDistances(IReadOnlyList<IReadOnlyNumericSegment<T>> vectors, IReadOnlyList<IReadOnlyNumericSegment<T>> compareTo, DistanceMetric distanceMetric)
         {
             var rows = (uint)compareTo.Count;
-            var columns = (uint)vectors.Length;
+            var columns = (uint)vectors.Count;
             var ret = CreateMatrix(rows, columns, false);
             var totalSize = rows * columns;
 
@@ -1218,17 +1238,56 @@ namespace BrightData.LinearAlgebra
                 Parallel.For(0, rows * columns, ind => {
                     var i = (uint)(ind % rows);
                     var j = (uint)(ind / rows);
-                    ret[i, j] = compareTo[(int)i].FindDistance(vectors[j], distanceMetric);
+                    ret[i, j] = compareTo[(int)i].FindDistance(vectors[(int)j], distanceMetric);
                 });
             }
             else {
                 for (uint i = 0; i < rows; i++) {
                     for (uint j = 0; j < columns; j++) {
-                        ret[i, j] = compareTo[(int)i].FindDistance(vectors[j], distanceMetric);
+                        ret[i, j] = compareTo[(int)i].FindDistance(vectors[(int)j], distanceMetric);
                     }
                 }
             }
 
+            return ret;
+        }
+
+        /// <summary>
+        /// Finds the distance between each pair of vectors
+        /// </summary>
+        /// <param name="vectors"></param>
+        /// <param name="compareTo"></param>
+        /// <param name="distanceMetric"></param>
+        /// <returns></returns>
+        public virtual IMatrix<T> FindDistances(IReadOnlyList<IVector<T>> vectors, IReadOnlyList<IVector<T>> compareTo, DistanceMetric distanceMetric)
+        {
+            return FindDistances(
+                vectors.Select(x => x.Segment).ToArray(), 
+                compareTo.Select(x => x.Segment).ToArray(), 
+                distanceMetric
+            );
+        }
+
+        /// <summary>
+        /// Finds the distance between a vector and list of vectors
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="compareTo"></param>
+        /// <param name="distanceMetric"></param>
+        /// <returns></returns>
+        public virtual IVector<T> FindDistances(IReadOnlyNumericSegment<T> vector, IReadOnlyList<IReadOnlyNumericSegment<T>> compareTo, DistanceMetric distanceMetric)
+        {
+            var size = (uint)compareTo.Count;
+            var ret = CreateVector(size, false);
+            if (size >= Consts.MinimumSizeForParallel) {
+                Parallel.For(0, ret.Size, i => {
+                    ret[i] = vector.FindDistance(compareTo[(int)i], distanceMetric);
+                });
+            }
+            else {
+                for (uint i = 0; i < size; i++)
+                    ret[i] = vector.FindDistance(compareTo[(int)i], distanceMetric);
+            }
             return ret;
         }
 

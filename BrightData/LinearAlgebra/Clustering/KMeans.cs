@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BrightData.Types;
+using BrightData.LinearAlgebra.VectorIndexing;
 
 namespace BrightData.LinearAlgebra.Clustering
 {
@@ -59,7 +59,7 @@ namespace BrightData.LinearAlgebra.Clustering
             }
 
             // add the vectors
-            var vectorSet = new VectorSet<float>(vectors.First().Size);
+            using var vectorSet = VectorSet<float>.CreateFlat(vectors.First().Size);
             vectorSet.Add(vectors);
 
             for (uint i = 0; i < maxIterations; i++) {

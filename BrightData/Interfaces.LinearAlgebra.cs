@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using BrightData.Helper;
 using BrightData.LinearAlgebra;
 using CommunityToolkit.HighPerformance.Buffers;
 
@@ -151,7 +152,7 @@ namespace BrightData
         /// Tries to return a contiguous span from the current segment if possible
         /// </summary>
         /// <returns></returns>
-        IHaveReadOnlyContiguousSpan<T>? Contiguous { get; }
+        IHaveReadOnlyContiguousMemory<T>? Contiguous { get; }
 
         /// <summary>
         /// True if the segment wraps another segment
@@ -237,14 +238,19 @@ namespace BrightData
     }
 
     /// <summary>
-    /// Indicates that the type has a contiguous read only span
+    /// Indicates that the type has contiguous read only memory
     /// </summary>
-    public interface IHaveReadOnlyContiguousSpan<T>
+    public interface IHaveReadOnlyContiguousMemory<T>
     {
         /// <summary>
         /// A read only span
         /// </summary>
         ReadOnlySpan<T> ReadOnlySpan { get; }
+
+        /// <summary>
+        /// Read only contiguous memory
+        /// </summary>
+        ReadOnlyMemory<T> ContiguousMemory { get; }
     }
 
     /// <summary>
@@ -1711,4 +1717,5 @@ namespace BrightData
         /// <returns></returns>
         IReadOnlyNumericSegment<T> Gradient(IReadOnlyNumericSegment<T> predicted, IReadOnlyNumericSegment<T> expected);
     }
+
 }

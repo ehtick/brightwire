@@ -1,5 +1,6 @@
 ﻿using BrightData.Helper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,28 +44,28 @@ namespace BrightData
         /// <param name="segment"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (float Min, float Max, uint MinIndex, uint MaxIndex) GetMinAndMaxValues(this IReadOnlyNumericSegment<float> segment) => segment.ApplyReadOnlySpan(x => x.GetMinAndMaxValues());
+        public static (T Min, T Max, uint MinIndex, uint MaxIndex) GetMinAndMaxValues<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>, IMinMaxValue<T> => segment.ApplyReadOnlySpan(x => x.GetMinAndMaxValues());
 
         /// <summary>
         /// Returns the index with the minimum value from this tensor segment
         /// </summary>
         /// <param name="segment"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint GetMinimumIndex(this IReadOnlyNumericSegment<float> segment) => GetMinAndMaxValues(segment).MinIndex;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint GetMinimumIndex<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>, IMinMaxValue<T> => GetMinAndMaxValues(segment).MinIndex;
 
         /// <summary>
         /// Returns the index with the maximum value from this tensor segment
         /// </summary>
         /// <param name="segment"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint GetMaximumIndex(this IReadOnlyNumericSegment<float> segment) => GetMinAndMaxValues(segment).MaxIndex;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint GetMaximumIndex<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>, IMinMaxValue<T> => GetMinAndMaxValues(segment).MaxIndex;
 
         /// <summary>
         /// Sums all values
         /// </summary>
         /// <param name="segment"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float Sum(this IReadOnlyNumericSegment<float> segment) => segment.ApplyReadOnlySpan(x => x.Sum());
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T Sum<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, IBinaryFloatingPointIeee754<T> => segment.ApplyReadOnlySpan(x => x.Sum());
 
         /// <summary>
         /// Finds cosine distance (0 for perpendicular, 1 for orthogonal, 2 for opposite) between this and another vector
@@ -72,7 +73,7 @@ namespace BrightData
         /// <param name="vector"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float CosineDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other) => vector.ApplyReadOnlySpans(other, (x,y) => x.CosineDistance(y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T CosineDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.CosineDistance(y));
 
         /// <summary>
         /// Finds the euclidean distance between this and another vector
@@ -80,7 +81,7 @@ namespace BrightData
         /// <param name="vector"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float EuclideanDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other) => vector.ApplyReadOnlySpans(other, (x,y) => x.EuclideanDistance(y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T EuclideanDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.EuclideanDistance(y));
 
         /// <summary>
         /// Finds the manhattan distance between this and another vector
@@ -88,7 +89,7 @@ namespace BrightData
         /// <param name="vector"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float ManhattanDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other) => vector.ApplyReadOnlySpans(other, (x,y) => x.ManhattanDistance(y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T ManhattanDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.ManhattanDistance(y));
 
         /// <summary>
         /// Finds the mean squared distance between this and another vector
@@ -96,7 +97,7 @@ namespace BrightData
         /// <param name="vector"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float MeanSquaredDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other) => vector.ApplyReadOnlySpans(other, (x,y) => x.MeanSquaredDistance(y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T MeanSquaredDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.MeanSquaredDistance(y));
 
         /// <summary>
         /// Finds the squared euclidean distance between this and another vector
@@ -104,7 +105,7 @@ namespace BrightData
         /// <param name="vector"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float SquaredEuclideanDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other) => vector.ApplyReadOnlySpans(other, (x,y) => x.SquaredEuclideanDistance(y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T SquaredEuclideanDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.SquaredEuclideanDistance(y));
 
         /// <summary>
         /// Finds the distance between this and another vector
@@ -113,7 +114,7 @@ namespace BrightData
         /// <param name="other"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static float FindDistance(this IReadOnlyNumericSegment<float> vector, IReadOnlyNumericSegment<float> other, DistanceMetric distance) => vector.ApplyReadOnlySpans(other, (x,y) => x.FindDistance(y, distance));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static T FindDistance<T>(this IReadOnlyNumericSegment<T> vector, IReadOnlyNumericSegment<T> other, DistanceMetric distance) where T : unmanaged, IBinaryFloatingPointIeee754<T> => vector.ReduceReadOnlySpans(other, (x,y) => x.FindDistance(y, distance));
 
         /// <summary>
         /// Splits this tensor segment into multiple contiguous tensor segments
@@ -417,7 +418,7 @@ namespace BrightData
         /// <param name="segment2"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static RT ApplyReadOnlySpans<T, RT>(this IReadOnlyNumericSegment<T> segment1, IReadOnlyNumericSegment<T> segment2, TransformReadOnlySpans<T, RT> callback)  where T: unmanaged, INumber<T>
+        public static RT ReduceReadOnlySpans<T, RT>(this IReadOnlyNumericSegment<T> segment1, IReadOnlyNumericSegment<T> segment2, TransformReadOnlySpans<T, RT> callback)  where T: unmanaged, INumber<T>
         {
             SpanOwner<T> temp1 = SpanOwner<T>.Empty, temp2 = SpanOwner<T>.Empty;
             bool wasTemp1Used = false, wasTemp2Used = false;
@@ -599,6 +600,29 @@ namespace BrightData
             finally {
                 buffer.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Returns contiguous memory from a numeric segment (will be a copy if the segment is not contiguous)
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static ReadOnlyMemory<T> GetMemory<T>(this IReadOnlyNumericSegment<T> segment) 
+            where T : unmanaged, INumber<T>
+        {
+            IHaveReadOnlyContiguousMemory<T>? contiguous = null;
+            return (contiguous = segment.Contiguous) != null 
+                ? contiguous.ContiguousMemory 
+                : segment.ToNewArray()
+            ;
+        }
+
+        public static AT NIndices<T, AT>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>
+            where AT: IFixedSizeSortedArray<uint, T>, new()
+        {
+            return segment.ApplyReadOnlySpan(x => x.NIndices<T, AT>());
         }
     }
 }

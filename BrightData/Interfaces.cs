@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Numerics;
 using System.Threading.Tasks;
 using BrightData.Types;
 using CommunityToolkit.HighPerformance.Buffers;
@@ -163,7 +163,87 @@ namespace BrightData
         void Add(T obj);
     }
 
-/// <summary>
+    /// <summary>
+    /// Standard deviation analysis
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IStandardDeviationAnalysis<T> where T : unmanaged
+    {
+        /// <summary>
+        /// Numerical mean
+        /// </summary>
+        T Mean { get; }
+
+        /// <summary>
+        /// Sample variance
+        /// </summary>
+        T? SampleVariance { get; }
+
+        /// <summary>
+        /// Population variance
+        /// </summary>
+        T? PopulationVariance { get; }
+
+        /// <summary>
+        /// Sample standard deviation
+        /// </summary>
+        T? SampleStdDev { get; }
+
+        /// <summary>
+        /// Population standard deviation
+        /// </summary>
+        T? PopulationStdDev { get; }
+
+        /// <summary>
+        /// Count of items that were analysed
+        /// </summary>
+        ulong Count { get; }
+    }
+
+    /// <summary>
+    /// Numerical analysis
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface INumericAnalysis<T> : IStandardDeviationAnalysis<T>
+        where T: unmanaged
+    {
+        /// <summary>
+        /// L1 norm
+        /// </summary>
+        T L1Norm { get; }
+
+        /// <summary>
+        /// L2 norm
+        /// </summary>
+        T L2Norm { get; }
+
+        /// <summary>
+        /// Minimum number
+        /// </summary>
+        T Min { get; }
+
+        /// <summary>
+        /// Maximum number
+        /// </summary>
+        T Max { get; }
+
+        /// <summary>
+        /// Number of unique numbers
+        /// </summary>
+        uint NumDistinct { get; }
+
+        /// <summary>
+        /// Median
+        /// </summary>
+        T? Median { get; }
+
+        /// <summary>
+        /// Mode
+        /// </summary>
+        T? Mode { get; }
+    }
+
+    /// <summary>
     /// Types of data normalization
     /// </summary>
     public enum NormalizationType : byte
@@ -279,7 +359,7 @@ namespace BrightData
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IDistribution<out T>
-        where T : struct
+        where T : unmanaged, INumber<T>
     {
         /// <summary>
         /// Samples a value from the distribution
@@ -301,7 +381,7 @@ namespace BrightData
     /// <summary>
     /// Continuous data distribution
     /// </summary>
-    public interface IContinuousDistribution : IDistribution<float>;
+    public interface IContinuousDistribution<out T> : IDistribution<T> where T : unmanaged, INumber<T>, IBinaryFloatingPointIeee754<T>;
 
     /// <summary>
     /// Indicates that the type has a size
@@ -522,7 +602,7 @@ namespace BrightData
         uint[][] Cluster(IReadOnlyVector<float>[] vectors, uint numClusters, DistanceMetric metric);
     }
 
-    internal interface ICompositeBufferBlock<T>
+    internal interface IMutableBufferBlock<T>
     {
         uint Size { get; }
         Task<uint> WriteTo(IByteBlockSource file);
@@ -539,5 +619,225 @@ namespace BrightData
         public uint InfinityCount { get; }
         public double MinValue { get; }
         public double MaxValue { get; }
+    }
+
+    /// <summary>
+    /// Fixed size sorted array of values and weights
+    /// </summary>
+    /// <typeparam name="V">Type of value to store</typeparam>
+    /// <typeparam name="W">Type of weight that will be used to sort</typeparam>
+    public interface IFixedSizeSortedArray<V, W> : IHaveSize
+    {
+        /// <summary>
+        /// Maximum number of elements that can fit in the array
+        /// </summary>
+        byte MaxSize { get; }
+
+        /// <summary>
+        /// Current number of elements
+        /// </summary>
+        new byte Size { get; }
+        uint IHaveSize.Size => Size;
+
+        /// <summary>
+        /// Sorted list of values
+        /// </summary>
+        ReadOnlySpan<V> Values { get; }
+
+        /// <summary>
+        /// Sorted list of weights
+        /// </summary>
+        ReadOnlySpan<W> Weights { get; }
+
+        /// <summary>
+        /// The smallest weight
+        /// </summary>
+        W MinWeight { get; }
+
+        /// <summary>
+        /// The largest weight
+        /// </summary>
+        W MaxWeight { get; }
+
+        /// <summary>
+        /// The value with the smallest weight
+        /// </summary>
+        V? MinValue { get; }
+
+        /// <summary>
+        /// The value with the largest weight
+        /// </summary>
+        V? MaxValue { get; }
+
+        /// <summary>
+        /// Returns a value and weight
+        /// </summary>
+        /// <param name="index">Index to return</param>
+        (V Value, W Weight) this[uint index] { get; }
+
+        /// <summary>
+        /// Enumerates the values and weights
+        /// </summary>
+        IEnumerable<(V Value, W Weight)> Elements { get; }
+
+        /// <summary>
+        /// Tries to add a new element - will succeed if there aren't already max elements with a smaller weight
+        /// </summary>
+        /// <param name="value">Value to add</param>
+        /// <param name="weight">Weight to add</param>
+        /// <param name="enforceUnique">True if values should be unique - will return false if the value already exists</param>
+        /// <returns>True if the element was added</returns>
+        bool TryAdd(V value, W weight, bool enforceUnique = true);
+
+        /// <summary>
+        /// Removes an element from the array
+        /// </summary>
+        /// <param name="index">Index of element to remove</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        V RemoveAt(byte index);
+    }
+
+    /// <summary>
+    /// A graph node
+    /// </summary>
+    public interface IGraphNode : IHaveSingleIndex
+    {
+        /// <summary>
+        /// Span of neighbour indices
+        /// </summary>
+        ReadOnlySpan<uint> NeighbourSpan { get; }
+
+        /// <summary>
+        /// Enumerable of neighbour indices
+        /// </summary>
+        IEnumerable<uint> Neighbours { get; }
+    }
+
+    /// <summary>
+    /// A graph node with weighted neighbours
+    /// </summary>
+    /// <typeparam name="T">Type of value to store</typeparam>
+    /// <typeparam name="W">Type of weight</typeparam>
+    public interface IWeightedGraphNode<out T, W> : IGraphNode
+        where T: IHaveSingleIndex
+        where W : unmanaged, INumber<W>, IMinMaxValue<W>
+    {
+        /// <summary>
+        /// Graph node value
+        /// </summary>
+        public T Value { get; }
+
+        /// <summary>
+        /// Tries to add a neighbour to this node
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="weight"></param>
+        /// <returns></returns>
+        bool TryAddNeighbour(uint index, W weight);
+
+        /// <summary>
+        /// Enumerates the neighbour indices and their weights
+        /// </summary>
+        IEnumerable<(uint Index, W Weight)> WeightedNeighbours { get; }
+    }
+
+    /// <summary>
+    /// Calculates the weights between two indexed graph nodes
+    /// </summary>
+    /// <typeparam name="W"></typeparam>
+    public interface ICalculateNodeWeights<out W>
+        where W : unmanaged, INumber<W>, IMinMaxValue<W>
+    {
+        /// <summary>
+        /// Returns the weight between any two graph nodes
+        /// </summary>
+        /// <param name="fromIndex">First node</param>
+        /// <param name="toIndex">Second index</param>
+        /// <returns></returns>
+        W GetWeight(uint fromIndex, uint toIndex);
+    }
+
+    /// <summary>
+    /// A graph with weighted connections
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="W"></typeparam>
+    public interface IWeightedGraph<out T, W> : IHaveSize
+        where T: IHaveSingleIndex
+        where W : unmanaged, INumber<W>, IMinMaxValue<W>
+    {
+        /// <summary>
+        /// Finds the value of a node based on index
+        /// </summary>
+        /// <param name="nodeIndex"></param>
+        /// <returns></returns>
+        T Find(uint nodeIndex);
+
+        /// <summary>
+        /// Finds the value based on node position within the graph
+        /// </summary>
+        /// <param name="nodePosition"></param>
+        /// <returns></returns>
+        T this[uint nodePosition] { get; }
+
+        /// <summary>
+        /// Performs a probabilistic search between two nodes
+        /// </summary>
+        /// <typeparam name="RAT">Return array type</typeparam>
+        /// <typeparam name="CAT">Candidate array type</typeparam>
+        /// <param name="q">Node index to query</param>
+        /// <param name="entryPoint">Node index from which to start the search</param>
+        /// <param name="distanceCalculator">Weigh calculator</param>
+        /// <returns></returns>
+        RAT ProbabilisticSearch<RAT, CAT>(uint q, uint entryPoint, ICalculateNodeWeights<W> distanceCalculator)
+            where RAT : struct, IFixedSizeSortedArray<uint, W>
+            where CAT : struct, IFixedSizeSortedArray<uint, W>
+        ;
+
+        /// <summary>
+        /// Returns the neighbour indices of a node based on index
+        /// </summary>
+        /// <param name="nodeIndex"></param>
+        /// <returns></returns>
+        ReadOnlySpan<uint> GetNeighbours(uint nodeIndex);
+
+        /// <summary>
+        /// Enumerates the neighbours and their weights of a node based on index
+        /// </summary>
+        /// <param name="nodeIndex"></param>
+        /// <returns></returns>
+        IEnumerable<(uint NeighbourIndex, W Weight)> EnumerateNeighbours(uint nodeIndex);
+
+        /// <summary>
+        /// Adds a new neighbour to a node
+        /// </summary>
+        /// <param name="toNodeIndex">Node index to add to</param>
+        /// <param name="neighbourIndex">Index of the neighbour node</param>
+        /// <param name="weight">Weight of the connection</param>
+        /// <returns></returns>
+        bool AddNeighbour(uint toNodeIndex, uint neighbourIndex, W weight);
+    }
+
+    /// <summary>
+    /// A graph with weighted connections that can be dynamically extended
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="W"></typeparam>
+    public interface IWeightedDynamicGraph<T, W> : IWeightedGraph<T, W>
+        where T: IHaveSingleIndex
+        where W : unmanaged, INumber<W>, IMinMaxValue<W>
+    {
+        /// <summary>
+        /// Adds a new node
+        /// </summary>
+        /// <param name="value"></param>
+        void Add(T value);
+
+        /// <summary>
+        /// Adds a new node and its neighbours
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="neighbours"></param>
+        void Add(T value, ReadOnlySpan<(uint Index, W Weight)> neighbours);
     }
 }

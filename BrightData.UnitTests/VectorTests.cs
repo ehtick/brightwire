@@ -76,21 +76,18 @@ namespace BrightData.UnitTests
 
         void TestDistances(DistanceMetric distanceMetric)
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
-            var vectors = Enumerable.Range(0, 10).Select(_ => _cpu.CreateVector(100, _ => distribution.Sample())).ToArray();
-            var compareTo = Enumerable.Range(0, 20).Select(_ => _cpu.CreateVector(100, _ => distribution.Sample())).ToArray();
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
+            var vectors = Enumerable.Range(0, 10).Select(_ => (IReadOnlyNumericSegment<float>)_cpu.CreateSegment(100, _ => distribution.Sample())).ToArray();
+            var compareTo = Enumerable.Range(0, 20).Select(_ => (IReadOnlyNumericSegment<float>)_cpu.CreateSegment(100, _ => distribution.Sample())).ToArray();
 
-            var gpuVectors = vectors.Select(v => _cuda.CreateVector(v.Segment)).ToArray();
-            var gpuCompareTo = compareTo.Select(v => _cuda.CreateVector(v.Segment)).ToArray();
-
-            var mklVectors = vectors.Select(v => _mkl.CreateVector(v.Segment)).ToArray();
-            var mklCompareTo = compareTo.Select(v => _mkl.CreateVector(v.Segment)).ToArray();
+            var gpuVectors = vectors.Select(_cuda.CreateSegment).ToArray();
+            var gpuCompareTo = compareTo.Select(_cuda.CreateSegment).ToArray();
 
             try {
                 AssertSameAndThenDispose(
                     _cpu.FindDistances(vectors, compareTo, distanceMetric), 
                     _cuda.FindDistances(gpuVectors, gpuCompareTo, distanceMetric), 
-                    _mkl.FindDistances(mklVectors, mklCompareTo, distanceMetric)
+                    _mkl.FindDistances(vectors, compareTo, distanceMetric)
                 );
             }
             finally {
@@ -98,8 +95,6 @@ namespace BrightData.UnitTests
                 compareTo.DisposeAll();
                 gpuVectors.DisposeAll();
                 gpuCompareTo.DisposeAll();
-                mklVectors.DisposeAll();
-                mklCompareTo.DisposeAll();
             }
         }
 
@@ -318,7 +313,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorEuclideanDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(500, _ => distribution.Sample());
             using var b = _cpu.CreateVector(500, _ => distribution.Sample());
@@ -345,7 +340,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorManhattanDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(5000, _ => distribution.Sample());
@@ -359,7 +354,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorMeanSquaredDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(1000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(1000, _ => distribution.Sample());
@@ -372,7 +367,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorSquaredEuclideanDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(1000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(1000, _ => distribution.Sample());
@@ -386,7 +381,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorAverage()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             var cpu = a.Average();
@@ -398,7 +393,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorL1Norm()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             var cpu = a.L1Norm();
@@ -410,7 +405,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorAbs()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             var cpu = a.Abs();
@@ -422,7 +417,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorLog()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             var cpu = a.Log();
@@ -435,7 +430,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorStdDev()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             var cpu = a.StdDev(null);
@@ -498,7 +493,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void MultiEuclideanDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(5000, _ => distribution.Sample());
@@ -512,7 +507,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void MultiManhattanDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(5000, _ => distribution.Sample());
@@ -525,7 +520,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void MultiCosineDistance()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
 
             using var a = _cpu.CreateVector(5000, _ => distribution.Sample());
             using var b = _cpu.CreateVector(5000, _ => distribution.Sample());
@@ -628,7 +623,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorSoftMax()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
             using var a = _cpu.CreateVector(128, _ => distribution.Sample());
             using var cpu = a.Softmax();
 
@@ -640,7 +635,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorSoftMaxDerivative()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
             using var a = _cpu.CreateVector(128, _ => distribution.Sample());
             using var cpu = a.SoftmaxDerivative();
 
@@ -655,7 +650,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void VectorReverse()
         {
-            var distribution = _context.CreateNormalDistribution(0, 5);
+            var distribution = _context.CreateNormalDistribution<float>(0, 5);
             var a = _cpu.CreateVector(128, _ => distribution.Sample());
             var cpu = a.Reverse();
 
