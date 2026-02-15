@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using BrightData.Cuda.CudaToolkit;
 using BrightData.Cuda.CudaToolkit.Types;
-using BrightData.Helper;
 using Math = System.Math;
 
 namespace BrightData.Cuda.Helper
@@ -50,10 +47,16 @@ namespace BrightData.Cuda.Helper
 
         public static void FindLeakedBlocks(HashSet<IDeviceMemoryPtr> exclude)
         {
+            var leakedBlocks = new List<DeviceMemoryBlockBase>();
             AllocatedBlocks.ForEach(b => {
-                if(!exclude.Contains(b))
-                    Debug.WriteLine($"Found leaked memory: block {b.Index} ({b.IsValid}): {b.Size:N0} bytes");
+                if (!exclude.Contains(b))
+                    leakedBlocks.Add(b);
             });
+            if(leakedBlocks.Count > 0) {
+                Debug.WriteLine($"Found {leakedBlocks.Count:N0} leaked CUDA memory blocks!");
+                foreach(var b in leakedBlocks.OrderByDescending(x => x.Index).Take(10))
+                    Debug.WriteLine($"Block {b.Index} ({b.IsValid}): {b.Size:N0} bytes");
+            }
         }
 #endif
 

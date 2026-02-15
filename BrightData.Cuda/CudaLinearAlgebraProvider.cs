@@ -27,6 +27,8 @@ namespace BrightData.Cuda
         {
             GC.SuppressFinalize(this);
             base.Dispose();
+            Provider.Dispose();
+
 #if DEBUG
             var trackedBlocks = new HashSet<IDeviceMemoryPtr>();
             foreach (var block in Scope) {
@@ -35,7 +37,6 @@ namespace BrightData.Cuda
             }
             DeviceMemoryBlockBase.FindLeakedBlocks(trackedBlocks);
 #endif
-            Provider.Dispose();
         }
 
         /// <summary>

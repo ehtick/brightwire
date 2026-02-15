@@ -29,6 +29,8 @@ namespace BrightWire.ExecutionGraph.Activation
             var input = signal.GetMatrix();
             var rowList = input.SoftmaxPerRow();
             var output = lap.CreateMatrixFromRows(rowList);
+            foreach(var item in rowList)
+                lap.AddToScope(item);
             return (this, signal.ReplaceWith(output), () => new Backpropagation(this, rowList));
         }
     }

@@ -446,13 +446,9 @@ namespace ExampleCode.DataSet
             {
                 extractor = filePath =>
                 {
-                    using var archive = RarArchive.Open(filePath);
+                    using var archive = RarArchive.OpenArchive(filePath);
                     foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory)) {
-                        entry.WriteToDirectory(directoryPath, new ExtractionOptions()
-                        {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
+                        entry.WriteToDirectory(directoryPath);
                     }
                 };
             }

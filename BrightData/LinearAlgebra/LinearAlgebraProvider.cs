@@ -107,7 +107,13 @@ namespace BrightData.LinearAlgebra
                     item.Dispose();
             }
         }
-        internal bool AddToScope(IDisposable obj) => Scope.First().TryAdd(obj, true);
+
+        /// <summary>
+        /// Adds a disposable to the current scope
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool AddToScope(IDisposable obj) => Scope.First().TryAdd(obj, true);
         internal bool RemoveFromScope(IDisposable obj) => _isPoppingScope || (Scope.FirstOrDefault()?.TryRemove(new KeyValuePair<IDisposable, bool>(obj, true)) ?? false);
 
         /// <summary>

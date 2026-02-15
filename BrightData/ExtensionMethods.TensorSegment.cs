@@ -630,5 +630,803 @@ namespace BrightData
         {
             return segment.ApplyReadOnlySpan(x => x.NIndices<T, AT>());
         }
+
+        /// <summary>
+        /// Creates a new tensor segment from applying an operation to each pair of elements from this and another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="func">Function that computes a new value from a pair of values</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static INumericSegment<T> ZipParallel<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            Func<T, T, T> func
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.ZipParallel(y, func));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Applies a function across each pair of elements from this and another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="func1">Vector callback</param>
+        /// <param name="func2">Element callback</param>
+        /// <returns></returns>
+        public static INumericSegment<T> ZipVectorized<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            ExtensionMethods.ComputeVectorisedTwo<T> func1,
+            Func<T, T, T> func2
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.ZipVectorized(y, func1, func2));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment from an existing tensor segment via a vectorization function
+        /// </summary>
+        /// <param name="segment">Input tensor segment</param>
+        /// <param name="transformer1">Vectorized transformer</param>
+        /// <param name="transformer2">Sequential transformer</param>
+        /// <returns></returns>
+        public static INumericSegment<T> TransformVectorized<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            ExtensionMethods.ComputeVectorisedOne<T> transformer1,
+            Func<T, T> transformer2
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.TransformVectorized(transformer1, transformer2));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment from an existing tensor segment via a function (possibly executed in parallel) that receives an index and returns a new value
+        /// </summary>
+        /// <param name="segment">Input tensor segment</param>
+        /// <param name="transformer">Transformation function (possibly executed in parallel)</param>
+        /// <returns></returns>
+        public static INumericSegment<T> TransformParallelIndexed<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            Func<uint, T> transformer
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.TransformParallelIndexed(transformer));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment from an existing tensor segment via a function (possibly executed in parallel) that receives an index and value and returns a new value
+        /// </summary>
+        /// <param name="segment">Input tensor segment</param>
+        /// <param name="transformer">Transformation function (possibly executed in parallel)</param>
+        /// <returns></returns>
+        public static INumericSegment<T> TransformParallelIndexed<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            Func<uint, T, T> transformer
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.TransformParallelIndexed(transformer));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Updates a tensor segment by applying an update function that receives pairs of values from this and another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="func">Update function</param>
+        public static void Mutate<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            Func<T, T, T> func
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.Mutate(y, func));
+        }
+
+        /// <summary>
+        /// Updates a tensor segment by applying a vectorized transformation function to each pair of elements in this and another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="transformer1">Vectorized transformer</param>
+        /// <param name="transformer2">Sequential transformer</param>
+        public static void MutateVectorized<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            ExtensionMethods.ComputeVectorisedTwo<T> transformer1,
+            Func<T, T, T> transformer2
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.MutateVectorized(y, transformer1, transformer2));
+        }
+
+        /// <summary>
+        /// Updates a tensor segment in place by applying a mutation function (potentially called in parallel) to each element
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="mutator"></param>
+        public static void MutateInPlace<T>(
+            this INumericSegment<T> segment,
+            Func<T, T> mutator
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.MutateInPlace(mutator));
+        }
+
+        /// <summary>
+        /// Updates a tensor segment in place by applying a mutation function (potentially called in parallel) to each element
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="mutator"></param>
+        public static void MutateInPlace<T>(
+            this INumericSegment<T> segment,
+            Func<uint, T, T> mutator
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.MutateInPlace(mutator));
+        }
+
+        /// <summary>
+        /// Updates a tensor segment in place by applying a vectorization function to each value
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="mutator1"></param>
+        /// <param name="mutator2"></param>
+        public static void MutateInPlaceVectorized<T>(
+            this INumericSegment<T> segment,
+            ExtensionMethods.ComputeVectorisedOne<T> mutator1,
+            Func<T, T> mutator2
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.MutateInPlaceVectorized(mutator1, mutator2));
+        }
+
+        /// <summary>
+        /// Calculates the dot product between this tensor segment and another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <returns></returns>
+        public static T DotProduct<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            return segment.ReduceReadOnlySpans(other, (x, y) => x.DotProduct(y));
+        }
+
+        /// <summary>
+        /// Returns a new tensor segment that contains this tensor segment added to another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Add<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.Add(y));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Returns a new tensor segment that contains this tensor segment added to another tensor segment where each value is multiplied by coefficients
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="coefficient1">Coefficient to apply to each value in this tensor segment</param>
+        /// <param name="coefficient2">Coefficient to apply to each value in the other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Add<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            T coefficient1,
+            T coefficient2
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.Add(y, coefficient1, coefficient2));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Returns a new tensor segment that contains each value added to a scalar
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="scalar"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Add<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            T scalar
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Add(scalar));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Adds another tensor segment to this tensor segment in place
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        public static void AddInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.AddInPlace(y));
+        }
+
+        /// <summary>
+        /// Adds another tensor segment to this tensor segment and applies coefficients to each value
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="coefficient1">Coefficient to apply to each value in this tensor segment</param>
+        /// <param name="coefficient2">Coefficient to apply to each value in the other tensor segment</param>
+        public static void AddInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            T coefficient1,
+            T coefficient2
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.AddInPlace(y, coefficient1, coefficient2));
+        }
+
+        /// <summary>
+        /// Adds a scalar to each value
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="scalar"></param>
+        public static void AddInPlace<T>(
+            this INumericSegment<T> segment,
+            T scalar
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.AddInPlace(scalar));
+        }
+
+        /// <summary>
+        /// Multiplies each value by a scalar
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="scalar"></param>
+        public static void MultiplyInPlace<T>(
+            this INumericSegment<T> segment,
+            T scalar
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.MultiplyInPlace(scalar));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains each value multiplied by a scalar
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="scalar"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Multiply<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            T scalar
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Multiply(scalar));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment in which each value in another tensor segment is subtracted from the values in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Subtract<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.Subtract(y));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment in which each value in another tensor segment is multiplied by the second coefficient and then subtracted from the values in this tensor segment multiplied by the first coefficient
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="coefficient1">Coefficient to apply to each value in this tensor segment</param>
+        /// <param name="coefficient2">Coefficient to apply to each value in the other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Subtract<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            T coefficient1,
+            T coefficient2
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.Subtract(y, coefficient1, coefficient2));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Subtracts another tensor segment from this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        public static void SubtractInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.SubtractInPlace(y));
+        }
+
+        /// <summary>
+        /// Modifies this tensor segment so that each value in another tensor segment is multiplied by the second coefficient and then subtracted from the values in this tensor segment multiplied by the first coefficient
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <param name="coefficient1">Coefficient to apply to each value in this tensor segment</param>
+        /// <param name="coefficient2">Coefficient to apply to each value in the other tensor segment</param>
+        public static void SubtractInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other,
+            T coefficient1,
+            T coefficient2
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.SubtractInPlace(y, coefficient1, coefficient2));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment in which each value in this tensor segment is multiplied by the pairwise value from another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> PointwiseMultiply<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.PointwiseMultiply(y));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Modifies this tensor segment so that each value is multiplied by the pairwise value from another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        public static void PointwiseMultiplyInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.PointwiseMultiplyInPlace(y));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment in which each value in this tensor segment is divided by the pairwise value from another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> PointwiseDivide<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ReduceReadOnlySpans(other, (x, y) => x.PointwiseDivide(y));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Modifies this tensor segment so that each value in this tensor segment is divided by the pairwise value from another tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="other">Other tensor segment</param>
+        public static void PointwiseDivideInPlace<T>(
+            this INumericSegment<T> segment,
+            IReadOnlyNumericSegment<T> other
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpans(true, other, (x, y) => x.PointwiseDivideInPlace(y));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains the square root of each value in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="adjustment">A small value to add to each value in case of zeros</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Sqrt<T>(
+            this IReadOnlyNumericSegment<T> segment,
+            T adjustment
+        ) where T : unmanaged, INumber<T>, IRootFunctions<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Sqrt(adjustment));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Modifies this tensor segment so that each value falls between the min and max values
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="minValue"></param>
+        /// <param name="maxValue"></param>
+        public static void ConstrainInPlace<T>(
+            this INumericSegment<T> segment,
+            T? minValue,
+            T? maxValue
+        ) where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.ConstrainInPlace(minValue, maxValue));
+        }
+
+        /// <summary>
+        /// Finds the average value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static T Average<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.Average());
+        }
+
+        /// <summary>
+        /// Calculates the L1 norm of this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <returns></returns>
+        public static T L1Norm<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.L1Norm());
+        }
+
+        /// <summary>
+        /// Calculates the L2 norm of this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <returns></returns>
+        public static T L2Norm<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>, IRootFunctions<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.L2Norm());
+        }
+
+        /// <summary>
+        /// Checks if each value in this tensor segment is finite (not NaN or Infinity)
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static bool IsEntirelyFinite<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.IsEntirelyFinite());
+        }
+
+        /// <summary>
+        /// Reverses the tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Reverse<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Reverse());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains the absolute value of each value in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Abs<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Abs());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains the natural logarithm of each value in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Log<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, ILogarithmicFunctions<T>, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Log());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains the exponent of each value in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Exp<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, IExponentialFunctions<T>, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Exp());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment that contains each value raised by the specified power in this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="power">Specified power</param>
+        /// <returns></returns>
+        public static INumericSegment<T> Pow<T>(this IReadOnlyNumericSegment<T> segment, T power) where T : unmanaged, IPowerFunctions<T>, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Pow(power));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment in which each value in this tensor segment is squared
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Squared<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Squared());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Calculates the standard deviation of this tensor segment
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="mean">Mean of the tensor segment (optional)</param>
+        /// <returns></returns>
+        public static T StdDev<T>(this IReadOnlyNumericSegment<T> segment, T? mean) where T : unmanaged, INumber<T>, IRootFunctions<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.StdDev(mean));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment with sigmoid function applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Sigmoid<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, ISignedNumber<T>, INumber<T>, IExponentialFunctions<T> => MapParallel(segment, x => Sigmoid(x));
+
+        /// <summary>
+        /// Creates a new tensor segment with sigmoid derivative applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> SigmoidDerivative<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, ISignedNumber<T>, INumber<T>, IExponentialFunctions<T> => MapParallel(segment, x => SigmoidDerivative(x));
+
+        /// <summary>
+        /// Creates a new tensor segment with tanh function applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Tanh<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IHyperbolicFunctions<T> => MapParallel(segment, T.Tanh);
+
+        /// <summary>
+        /// Creates a new tensor segment with tanh derivative applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> TanhDerivative<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T>, IPowerFunctions<T>, IHyperbolicFunctions<T> => MapParallel(segment, ExtensionMethods.TanhDerivative);
+
+        /// <summary>
+        /// Creates a new tensor segment with RELU function applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Relu<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T> => MapParallel(segment, ExtensionMethods.Relu);
+
+        /// <summary>
+        /// Creates a new tensor segment with RELU derivative applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> ReluDerivative<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T> => MapParallel(segment, ExtensionMethods.ReluDerivative);
+
+        /// <summary>
+        /// Creates a new tensor segment with Leaky RELU function applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> LeakyRelu<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T> => MapParallel(segment, ExtensionMethods.LeakyRelu);
+
+        /// <summary>
+        /// Creates a new tensor segment with Leaky RELU derivative applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> LeakyReluDerivative<T>(this IReadOnlyNumericSegment<T> segment) where T : unmanaged, INumber<T> => MapParallel(segment, ExtensionMethods.LeakyReluDerivative);
+
+        /// <summary>
+        /// Creates a new tensor segment with softmax function applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> Softmax<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T>, IExponentialFunctions<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.Softmax());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment with softmax derivative applied to each value in this tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="rowCount"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> SoftmaxDerivative<T>(this IReadOnlyNumericSegment<T> segment, int rowCount)
+            where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.SoftmaxDerivative(rowCount));
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Rounds each value in this tensor segment to be either the lower or upper supplied parameters
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="lower"></param>
+        /// <param name="upper"></param>
+        public static void RoundInPlace<T>(this INumericSegment<T> segment, T lower, T upper)
+            where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.RoundInPlace(lower, upper));
+        }
+
+        /// <summary>
+        /// In place L1 regularization of the tensor segment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="coefficient">Coefficient to apply to each adjusted value</param>
+        public static void L1Regularization<T>(this INumericSegment<T> segment, T coefficient)
+            where T : unmanaged, INumber<T>
+        {
+            segment.ApplySpan(true, x => x.L1Regularization(coefficient));
+        }
+
+        /// <summary>
+        /// Angular distance between two vectors
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static T AngularDistance<T>(this IReadOnlyNumericSegment<T> segment, IReadOnlyNumericSegment<T> other)
+            where T : unmanaged, IBinaryFloatingPointIeee754<T>
+        {
+            return segment.ReduceReadOnlySpans(other, (x, y) => x.AngularDistance(y));
+        }
+
+        /// <summary>
+        /// Inner space distance between two vectors
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static T InnerProductSpaceDistance<T>(this IReadOnlyNumericSegment<T> segment, IReadOnlyNumericSegment<T> other)
+            where T : unmanaged, IBinaryFloatingPointIeee754<T>
+        {
+            return segment.ReduceReadOnlySpans(other, (x, y) => x.InnerProductSpaceDistance(y));
+        }
+
+        /// <summary>
+        /// Find the minimum value and index in a tensor segment
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyze</param>
+        /// <returns>Tuple containing the minimum value and its index</returns>
+        public static (T Value, uint Index) Minimum<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.Minimum());
+        }
+
+        /// <summary>
+        /// Returns the index of the minimum value within a tensor segment
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyse</param>
+        /// <returns></returns>
+        public static uint MinimumIndex<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T> => Minimum(segment).Index;
+
+        /// <summary>
+        /// Returns the minimum value
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyse</param>
+        /// <returns></returns>
+        public static T MinimumValue<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T> => Minimum(segment).Value;
+
+        /// <summary>
+        /// Returns the maximum value and index within a tensor segment
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyse</param>
+        /// <returns>Tuple containing the maximum value and its index</returns>
+        public static (T Value, uint Index) Maximum<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.Maximum());
+        }
+
+        /// <summary>
+        /// Returns the maximum value within a tensor segment
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyse</param>
+        /// <returns></returns>
+        public static uint MaximumIndex<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T> => Maximum(segment).Index;
+
+        /// <summary>
+        /// Returns the index of the maximum value within a tensor segment
+        /// </summary>
+        /// <param name="segment">Tensor segment to analyse</param>
+        /// <returns></returns>
+        public static T MaximumValue<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IMinMaxValue<T> => Maximum(segment).Value;
+
+        /// <summary>
+        /// Calculates the pearson correlation coefficient metric between two tensor segments
+        /// https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static T? PearsonCorrelationCoefficient<T>(this IReadOnlyNumericSegment<T> x, IReadOnlyNumericSegment<T> y)
+            where T : unmanaged, INumber<T>, IRootFunctions<T>
+        {
+            return x.ReduceReadOnlySpans(y, (a, b) => a.PearsonCorrelationCoefficient(b));
+        }
+
+        /// <summary>
+        /// Searches the tensor segment for the index of the first value that matches the specified value within a level of tolerance
+        /// </summary>
+        /// <param name="segment">This tensor segment</param>
+        /// <param name="value">Value to find</param>
+        /// <param name="tolerance">Degree of tolerance</param>
+        /// <returns></returns>
+        public static IReadOnlyCollection<uint> Search<T>(this IReadOnlyNumericSegment<T> segment, T value, T? tolerance = null)
+            where T : unmanaged, INumber<T>
+        {
+            return segment.ApplyReadOnlySpan(x => x.Search(value, tolerance));
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment from the current tensor segment divided by its L2 norm
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> EuclideanNormalize<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>, IRootFunctions<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.EuclideanNormalize());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
+
+        /// <summary>
+        /// Creates a new tensor segment from the current tensor segment divided by its L1 norm
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public static INumericSegment<T> ManhattanNormalize<T>(this IReadOnlyNumericSegment<T> segment)
+            where T : unmanaged, INumber<T>
+        {
+            var ret = segment.ApplyReadOnlySpan(x => x.ManhattanNormalize());
+            return new ArrayPoolTensorSegment<T>(ret);
+        }
     }
 }
