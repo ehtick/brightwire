@@ -73,10 +73,10 @@ extern "C"
         }
 	}
 
-	__global__ void AddToEachRow(float* __restrict a, const float* __restrict b, uint rows, uint columns)
+    __global__ void AddToEachRow(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 a[j * rows + i] += b[j];
             }
         }
@@ -84,8 +84,8 @@ extern "C"
 
 	__global__ void AddToEachColumn(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 a[j * rows + i] += b[i];
             }
         }
@@ -93,8 +93,8 @@ extern "C"
 
     __global__ void MultiplyByEachRow(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 a[j * rows + i] *= b[j];
             }
         }
@@ -102,8 +102,8 @@ extern "C"
 
 	__global__ void MultiplyByEachColumn(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 a[j * rows + i] *= b[i];
             }
         }
@@ -178,19 +178,19 @@ extern "C"
         }
 	}
 
-	__global__ void SumRows(const float* __restrict a, float* __restrict b, uint rows, uint columns)
+    __global__ void SumRows(const float* __restrict a, float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 atomicAdd(b + i, a[j * rows + i]);
             }
         }
 	}
 
-	__global__ void SumColumns(const float* __restrict a, float* __restrict b, uint rows, uint columns)
+    __global__ void SumColumns(const float* __restrict a, float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 atomicAdd(b + j, a[j * rows + i]);
             }
         }
@@ -321,8 +321,8 @@ extern "C"
 
 	__global__ void PointwiseDivideRows(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 uint index = j * rows + i;
 			    float val = a[index];
 			    a[index] = val / b[i];
@@ -332,8 +332,8 @@ extern "C"
 
 	__global__ void PointwiseDivideColumns(float* __restrict a, const float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 uint index = j * rows + i;
 			    float val = a[index];
 			    a[index] = val / b[j];
@@ -343,8 +343,8 @@ extern "C"
 
 	__global__ void SplitRows(const float* __restrict a, float* __restrict b, float* __restrict c, uint rows, uint columns, uint position)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 uint index = j * rows + i;
 			    float val = a[index];
 			    if(j >= position) {
@@ -358,8 +358,8 @@ extern "C"
 
 	__global__ void SplitColumns(const float* __restrict a, float* __restrict b, float* __restrict c, uint rows, uint columns, uint position)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 float val = a[j * rows + i];
 			    if(i >= position) {
 				    uint diff = i - position;
@@ -372,8 +372,8 @@ extern "C"
 
 	__global__ void ConcatColumns(const float* __restrict a, const float* __restrict b, float* __restrict c, uint rows, uint columns, uint topRowCount, uint bottomRowCount)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 float val;
 			    if(i >= topRowCount)
 				    val = b[j * bottomRowCount + i - topRowCount];
@@ -386,8 +386,8 @@ extern "C"
 
 	__global__ void ConcatRows(const float* __restrict a, const float* __restrict b, float* __restrict c, uint rows, uint columns, uint leftColumnCount)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 float val;
 			    if(j >= leftColumnCount)
 				    val = b[(j-leftColumnCount) * rows + i];
@@ -406,35 +406,12 @@ extern "C"
         }
 	}
 
-	/*__global__ void MultiEuclideanDistance(const float* __restrict a, const float* __restrict* b, float* __restrict c, uint size, uint columns)
-	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < size; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
-                float val1 = a[i];
-			    float val2 = b[j][i];
-                float val3 = val1 - val2;
-			    c[j * size + i] = val3 * val3;
-            }
-        }
-	}*/
-
 	__global__ void ManhattanDistance(const float* __restrict a, const float* __restrict b, float* __restrict c, uint count, uint ai, uint bi, uint ci)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
             c[index * ci] = fabs(a[index * ai] - b[index * bi]);
         }
 	}
-
-	/*__global__ void MultiManhattanDistance(const float* __restrict a, const float* __restrict* b, float* __restrict c, uint size, uint columns)
-	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < size; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
-                float val1 = a[i];
-			    float val2 = b[j][i];
-			    c[j * size + i] = abs(val1 - val2);
-            }
-        }
-	}*/
 
 	__global__ void CosineDistance(const float* __restrict a, const float* __restrict b, float* __restrict aa, float* __restrict ab, float* __restrict bb, uint count, uint ai, uint bi)
 	{
@@ -498,8 +475,8 @@ extern "C"
 
 	__global__ void CopyToMatrixRows(const float* __restrict* a, float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 float val = a[i][j];
 			    b[j * rows + i] = val;
             }
@@ -508,8 +485,8 @@ extern "C"
 
     __global__ void CopyToMatrixColumns(const float* __restrict* a, float* __restrict b, uint rows, uint columns)
 	{
-        for (uint i = blockDim.x * blockIdx.x + threadIdx.x; i < rows; i += blockDim.x * gridDim.x) {
-            for (uint j = blockDim.y * blockIdx.y + threadIdx.y; j < columns; j += blockDim.y * gridDim.y) {
+        for (uint j = blockDim.x * blockIdx.x + threadIdx.x; j < columns; j += blockDim.x * gridDim.x) {
+            for (uint i = blockDim.y * blockIdx.y + threadIdx.y; i < rows; i += blockDim.y * gridDim.y) {
                 float val = a[j][i];
                 //printf("i:%i(%i) j:%i(%i)\n", i, rows, j, columns);
 			    b[j * rows + i] = val;
