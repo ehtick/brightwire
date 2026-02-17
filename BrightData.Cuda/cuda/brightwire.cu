@@ -15,8 +15,10 @@
 
 #define BLOCKSIZE 32
 #define N BLOCKSIZE*BLOCKSIZE
-#define NEG_INF __int_as_float(0xff800000)
-#define POS_INF __int_as_float(0x7f800000)
+#define BIT_POSITIVE_INFINITY 0x7f800000
+#define BIT_NEGATIVE_INFINITY 0xff800000
+#define NEG_INF __int_as_float(BIT_NEGATIVE_INFINITY)
+#define POS_INF __int_as_float(BIT_POSITIVE_INFINITY)
 
 typedef unsigned int uint;
 
@@ -53,7 +55,7 @@ extern "C"
 	__global__ void Sqrt(const float* __restrict a, float* __restrict b, uint size, float valueAdjustment, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < size; index += blockDim.x * gridDim.x) {
-            b[index * bi] = sqrt(a[index * ai] + valueAdjustment);
+            b[index * bi] = sqrtf(a[index * ai] + valueAdjustment);
         }
 	}
 
@@ -110,14 +112,14 @@ extern "C"
 	__global__ void TanH(const float* __restrict a, float* __restrict b, uint size, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < size; index += blockDim.x * gridDim.x) {
-            b[index * bi] = tanh(a[index * ai]);
+            b[index * bi] = tanhf(a[index * ai]);
         }
 	}
 
 	__global__ void TanHDerivative(const float* __restrict a, float* __restrict b, uint size, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < size; index += blockDim.x * gridDim.x) {
-            float ta = tanh(a[index * ai]);
+            float ta = tanhf(a[index * ai]);
             b[index * bi] = 1.0f - ta * ta;
         }
 	}
@@ -125,14 +127,14 @@ extern "C"
 	__global__ void Sigmoid(const float* __restrict a, float* __restrict b, uint size, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < size; index += blockDim.x * gridDim.x) {
-            b[index * bi] = 1.0f / (1.0f + exp(-1.0f * a[index * ai]));
+            b[index * bi] = 1.0f / (1.0f + __expf(-1.0f * a[index * ai]));
         }
 	}
 
 	__global__ void SigmoidDerivative(const float* __restrict a, float* __restrict b, uint size, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < size; index += blockDim.x * gridDim.x) {
-            float sigmoid = 1.0f / (1.0f + exp(-1.0f * a[index * ai]));
+            float sigmoid = 1.0f / (1.0f + __expf(-1.0f * a[index * ai]));
 			b[index * bi] = sigmoid * (1.0f - sigmoid);
         }
 	}
@@ -201,7 +203,7 @@ extern "C"
         }
 	}
 
-    __global__ void MemCpy(float* __restrict a, float* __restrict b, uint count, uint offsetA, uint offsetB, uint ai, uint bi)
+    __global__ void MemCpy(float* __restrict a, const float* __restrict b, uint count, uint offsetA, uint offsetB, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
 			a[offsetA + (index * ai)] = b[offsetB + (index * bi)];
@@ -281,18 +283,18 @@ extern "C"
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
             uint ind = index * ai;
-            float val = a[ind * ai];
+            float val = a[ind];
 			if (val >= mid)
-				a[ind * ai] = upper;
+				a[ind] = upper;
 			else
-				a[ind * ai] = lower;
+				a[ind] = lower;
         }
 	}
 
 	__global__ void Pow(const float* __restrict a, float* __restrict b, uint count, float power, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-			b[index * bi] = pow(a[index * ai], power);
+			b[index * bi] = powf(a[index * ai], power);
         }
 	}
 
@@ -419,7 +421,7 @@ extern "C"
 	__global__ void ManhattanDistance(const float* __restrict a, const float* __restrict b, float* __restrict c, uint count, uint ai, uint bi, uint ci)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-            c[index * ci] = abs(a[index * ai] - b[index * bi]);
+            c[index * ci] = fabs(a[index * ai] - b[index * bi]);
         }
 	}
 
@@ -448,21 +450,21 @@ extern "C"
 	__global__ void Abs(const float* __restrict a, float* __restrict b, uint count, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-            b[index * bi] = abs(a[index * ai]);
+            b[index * bi] = fabs(a[index * ai]);
         }
 	}
 
 	__global__ void Log(const float* __restrict a, float* __restrict b, uint count, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-            b[index * bi] = log(a[index * ai]);
+            b[index * bi] = logf(a[index * ai]);
         }
 	}
 
     __global__ void Exp(const float* __restrict a, float* __restrict b, uint count, uint ai, uint bi)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-            b[index * bi] = exp(a[index * ai]);
+            b[index * bi] = __expf(a[index * ai]);
         }
 	}
 
@@ -476,7 +478,7 @@ extern "C"
 	__global__ void SoftmaxVector(const float* __restrict a, float* __restrict b, uint count, float max, uint ai)
 	{
         for (uint index = blockDim.x * blockIdx.x + threadIdx.x; index < count; index += blockDim.x * gridDim.x) {
-            b[index] = exp(a[index * ai] - max);
+            b[index] = __expf(a[index * ai] - max);
         }
 	}
 
