@@ -47,10 +47,9 @@ namespace ExampleCode
         {
             Console.CursorLeft = 0;
             Console.CursorTop = 0;
-            table.AddRow(name.ToEnumerable()
+            table.AddRow([.. name.ToEnumerable()
                 .Concat(results.Select(r => $"{r.TotalMicroseconds:N0}"))
-                .Cast<object>()
-                .ToArray()
+                .Cast<object>()]
             );
             Console.Write(table.ToString());
         }

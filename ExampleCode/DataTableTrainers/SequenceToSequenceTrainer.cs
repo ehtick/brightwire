@@ -63,11 +63,10 @@ namespace ExampleCode.DataTableTrainers
             return GetStringIndices(vector.ReadOnlySegment.ToNewArray());
         }
 
-        static uint[] GetStringIndices(float[] vector) => vector
+        static uint[] GetStringIndices(float[] vector) => [.. vector
             .Select((v, i2) => (Value: v, Index: (uint)i2))
             .Where(d => d.Value >= 0.5)
-            .Select(d => d.Index)
-            .ToArray()
+            .Select(d => d.Index)]
         ;
 
         public async Task TrainManyToOne()

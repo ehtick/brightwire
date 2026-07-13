@@ -19,12 +19,11 @@ namespace BrightWire.TreeBased
 
         public (string Label, float Weight)[] Classify(GenericTableRow row)
         {
-            return _forest
+            return [.. _forest
                 .Select(t => t.Classify(row).Single())
                 .GroupBy(d => d.Label)
                 .Select(g => (Label: g.Key, CombinedScore: g.Sum(d => d.Weight)))
-                .OrderByDescending(d => d.CombinedScore)
-                .ToArray()
+                .OrderByDescending(d => d.CombinedScore)]
             ;
         }
     }

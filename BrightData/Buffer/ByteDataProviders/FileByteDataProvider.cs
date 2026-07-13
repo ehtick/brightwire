@@ -11,14 +11,9 @@ namespace BrightData.Buffer.ByteDataProviders;
 /// <summary>
 /// Byte data provider based on memory mapped file
 /// </summary>
-internal class FileByteDataProvider : IByteDataProvider
+internal class FileByteDataProvider(string filePath) : IByteDataProvider
 {
-    readonly MemoryMappedFile _file;
-
-    public FileByteDataProvider(string filePath)
-    {
-        _file = MemoryMappedFile.CreateFromFile(filePath);
-    }
+    readonly MemoryMappedFile _file = MemoryMappedFile.CreateFromFile(filePath);
 
     public ByteDataBlock GetDataSpan(uint offset, uint size)
     {

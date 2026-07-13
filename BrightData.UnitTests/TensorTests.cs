@@ -437,7 +437,7 @@ namespace BrightData.UnitTests
 
         IReadOnlyTensor3D<float> CheckCreateTensor(uint rows, uint columns, uint depth, Func<uint, uint, uint, float>? valueProvider)
         {
-            return _context.CreateReadOnlyTensor3D(depth.AsRange().Select(k => CheckCreateMatrix(k, rows, columns, valueProvider)).ToArray());
+            return _context.CreateReadOnlyTensor3D([.. depth.AsRange().Select(k => CheckCreateMatrix(k, rows, columns, valueProvider))]);
         }
 
         [Fact]

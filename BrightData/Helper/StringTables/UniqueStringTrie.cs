@@ -14,7 +14,11 @@ namespace BrightData.Helper.StringTables
     /// An in-memory generic trie that maintains a prefix shortcut table based on usage
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class UniqueIndexedStringTrie<T> : IHaveDataAsReadOnlyByteSpan
+    /// <remarks>
+    /// Creates a trie from node data
+    /// </remarks>
+    /// <param name="data"></param>
+    public class UniqueIndexedStringTrie<T>(ReadOnlyMemory<UniqueIndexedStringTrie<T>.NodeData> data) : IHaveDataAsReadOnlyByteSpan
         where T: unmanaged, IComparable<T>
     {
         /// <summary>
@@ -190,18 +194,9 @@ namespace BrightData.Helper.StringTables
             }
         }
 
-        readonly ReadOnlyMemory<NodeData> _data;
+        readonly ReadOnlyMemory<NodeData> _data = data;
         readonly Dictionary<FixedSizePrefixArray, int> _prefixes = [];
         static readonly NodeData _defaultRoot = new(uint.MaxValue, default, 0, uint.MaxValue);
-
-        /// <summary>
-        /// Creates a trie from node data
-        /// </summary>
-        /// <param name="data"></param>
-        public UniqueIndexedStringTrie(ReadOnlyMemory<NodeData> data)
-        {
-            _data = data;
-        }
 
         /// <summary>
         /// Loads a string trie from a file

@@ -20,10 +20,10 @@ namespace BrightData.Helper.StringTables
         /// <returns></returns>
         public static StringTable Create(ReadOnlyMemory<byte> data)
         {
-            var blocks = data.GetTupleFromBlockHeader<OffsetAndSize, byte>();
+            var (Item1, Item2) = data.GetTupleFromBlockHeader<OffsetAndSize, byte>();
             return new StringTable(
-                blocks.Item1,
-                blocks.Item2
+                Item1,
+                Item2
             );
         }
 

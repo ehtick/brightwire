@@ -24,12 +24,12 @@ namespace BrightData.Parquet
             Context = context;
             _reader = reader;
             var dataFields = reader.Schema.DataFields;
-            ColumnMetaData = dataFields.Select(x =>
+            ColumnMetaData = [.. dataFields.Select(x =>
             {
                 var m = new MetaData();
                 m.SetName(x.Name);
                 return m;
-            }).ToArray();
+            })];
             _rowGroupReaderProvider = new(reader);
 
             // Fix #2: Use provider size instead of re-opening row groups

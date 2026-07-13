@@ -281,7 +281,7 @@ namespace BrightData.UnitTests
         [Fact]
         public void TestSum()
         {
-            using var vector = _linearAlgebraProvider.CreateVector(1025.AsRange().Select(i => (float)(i + 1)).ToArray());
+            using var vector = _linearAlgebraProvider.CreateVector([.. 1025.AsRange().Select(i => (float)(i + 1))]);
             Test(
                 vector, 
                 _mklLinearAlgebraProvider.CreateVector(vector), 

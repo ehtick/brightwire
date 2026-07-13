@@ -136,7 +136,7 @@ namespace ExampleCode.DataSet
             await foreach (var row in table.EnumerateRows()) {
                 docList[index++] = new TestClusteringTrainer.AaaiDocument(
                     (string)row[0],
-                    ((string)row[3]).Split(keywordSplit, StringSplitOptions.RemoveEmptyEntries).Select(str => str.ToLower()).ToArray(),
+                    [.. ((string)row[3]).Split(keywordSplit, StringSplitOptions.RemoveEmptyEntries).Select(str => str.ToLower())],
                     ((string)row[4]).Split(topicSplit, StringSplitOptions.RemoveEmptyEntries),
                     (string)row[5],
                     ((string)row[2]).Split(topicSplit, StringSplitOptions.RemoveEmptyEntries)

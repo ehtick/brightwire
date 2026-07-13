@@ -32,7 +32,7 @@ namespace BrightWire.TreeBased.Training
             }
 
             return new RandomForest {
-                Forest = ret.ToArray()
+                Forest = [.. ret]
             };
         }
     }

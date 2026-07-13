@@ -156,12 +156,12 @@ namespace BrightData.Types
                 }))
                 {
                     writer.WriteStartElement("metadata");
-                    foreach (var item in GetNonEmpty())
+                    foreach (var (Name, Value, StringValue) in GetNonEmpty())
                     {
                         writer.WriteStartElement("item");
-                        writer.WriteAttributeString("name", item.Name);
-                        writer.WriteAttributeString("type", item.Value.GetTypeCode().ToType().ToString());
-                        writer.WriteValue(item.StringValue);
+                        writer.WriteAttributeString("name", Name);
+                        writer.WriteAttributeString("type", Value.GetTypeCode().ToType().ToString());
+                        writer.WriteValue(StringValue);
                         writer.WriteEndElement();
                     }
 

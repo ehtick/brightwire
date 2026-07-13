@@ -741,8 +741,8 @@ namespace BrightData.Cuda
             var columns = (uint)vectors.Count;
             var ret = Provider.Allocate(rows * columns, null, true);
 
-            using (var vectorPtr = new PtrToDeviceMemoryList(vectors.Cast<IHaveDeviceMemory>().ToArray()))
-            using (var compareToPtr = new PtrToDeviceMemoryList(compareTo.Cast<IHaveDeviceMemory>().ToArray())) {
+            using (var vectorPtr = new PtrToDeviceMemoryList([.. vectors.Cast<IHaveDeviceMemory>()]))
+            using (var compareToPtr = new PtrToDeviceMemoryList([.. compareTo.Cast<IHaveDeviceMemory>()])) {
                 if (distanceMetric == DistanceMetric.Cosine) {
                     var aa = Provider.Allocate(rows * columns, null, true);
                     var bb = Provider.Allocate(rows * columns, null, true);

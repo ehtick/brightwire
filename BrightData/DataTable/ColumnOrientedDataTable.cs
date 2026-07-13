@@ -145,49 +145,49 @@ namespace BrightData.DataTable
         protected async ValueTask<ReadOnlyMemory<string>> GetStrings(ReadOnlyMemory<uint> block)
         {
             var data = await GetStringData();
-            return Copy(block, (in uint item) => data[(int)item]);
+            return Copy(block, (in item) => data[(int)item]);
         }
 
         protected async ValueTask<ReadOnlyMemory<BinaryData>> GetBinaryData(ReadOnlyMemory<DataRangeColumnType> block)
         {
             var data = await GetBinaryData();
-            return Copy(block, (in DataRangeColumnType item) => new BinaryData(data.Slice((int)item.StartIndex, (int)item.Size)));
+            return Copy(block, (in item) => new BinaryData(data.Slice((int)item.StartIndex, (int)item.Size)));
         }
 
         protected async ValueTask<ReadOnlyMemory<ReadOnlyVector<float>>> GetVectors(ReadOnlyMemory<DataRangeColumnType> block)
         {
             var data = await GetTensorData();
-            return Copy(block, (in DataRangeColumnType item) => new ReadOnlyVector<float>(data.Slice((int)item.StartIndex, (int)item.Size)));
+            return Copy(block, (in item) => new ReadOnlyVector<float>(data.Slice((int)item.StartIndex, (int)item.Size)));
         }
 
         protected async ValueTask<ReadOnlyMemory<ReadOnlyMatrix<float>>> GetMatrices(ReadOnlyMemory<MatrixColumnType> block)
         {
             var data = await GetTensorData();
-            return Copy(block, (in MatrixColumnType item) => new ReadOnlyMatrix<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.RowCount, item.ColumnCount));
+            return Copy(block, (in item) => new ReadOnlyMatrix<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.RowCount, item.ColumnCount));
         }
 
         protected async ValueTask<ReadOnlyMemory<ReadOnlyTensor3D<float>>> Get3DTensors(ReadOnlyMemory<Tensor3DColumnType> block)
         {
             var data = await GetTensorData();
-            return Copy(block, (in Tensor3DColumnType item) => new ReadOnlyTensor3D<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.Depth, item.RowCount, item.ColumnCount));
+            return Copy(block, (in item) => new ReadOnlyTensor3D<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.Depth, item.RowCount, item.ColumnCount));
         }
 
         protected async ValueTask<ReadOnlyMemory<ReadOnlyTensor4D<float>>> Get4DTensors(ReadOnlyMemory<Tensor4DColumnType> block)
         {
             var data = await GetTensorData();
-            return Copy(block, (in Tensor4DColumnType item) => new ReadOnlyTensor4D<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.Count, item.Depth, item.RowCount, item.ColumnCount));
+            return Copy(block, (in item) => new ReadOnlyTensor4D<float>(data.Slice((int)item.StartIndex, (int)item.Size), item.Count, item.Depth, item.RowCount, item.ColumnCount));
         }
 
         protected async ValueTask<ReadOnlyMemory<IndexList>> GetIndexLists(ReadOnlyMemory<DataRangeColumnType> block)
         {
             var data = await GetIndices();
-            return Copy(block, (in DataRangeColumnType item) => new IndexList(data.Slice((int)item.StartIndex, (int)item.Size)));
+            return Copy(block, (in item) => new IndexList(data.Slice((int)item.StartIndex, (int)item.Size)));
         }
 
         protected async ValueTask<ReadOnlyMemory<WeightedIndexList>> GetWeightedIndexLists(ReadOnlyMemory<DataRangeColumnType> block)
         {
             var data = await GetWeightedIndices();
-            return Copy(block, (in DataRangeColumnType item) => new WeightedIndexList(data.Slice((int)item.StartIndex, (int)item.Size)));
+            return Copy(block, (in item) => new WeightedIndexList(data.Slice((int)item.StartIndex, (int)item.Size)));
         }
 
         public async ValueTask<ReadOnlyMemory<float>> GetTensorData() => _tensors ??= await GetBlock<float>(_header.TensorOffset, _header.TensorSizeBytes);

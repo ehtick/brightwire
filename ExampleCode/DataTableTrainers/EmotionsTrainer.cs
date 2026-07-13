@@ -19,9 +19,7 @@ namespace ExampleCode.DataTableTrainers
             // read the data as CSV, skipping the header
             using var reader = new StreamReader(filePath);
             do {
-                var line = await reader.ReadLineAsync();
-                if(line is null)
-                    throw new InvalidDataException("No @data line found");
+                var line = await reader.ReadLineAsync() ?? throw new InvalidDataException("No @data line found");
                 if (line == "@data")
                     break;
             } while (true);

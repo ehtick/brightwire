@@ -265,8 +265,7 @@ namespace BrightData.LinearAlgebra
                         }
                     }
 
-                    if (indices != null)
-                        indices[targetY, targetX] = T.CreateChecked(bestOffset);
+                    indices?[targetY, targetX] = T.CreateChecked(bestOffset);
                     layer[targetY, targetX] = maxVal;
                 }
 

@@ -314,7 +314,7 @@ namespace BrightData.Types
         /// Converts the weighted index-list to an unweighted index-list (only those indices whose weight is not zero)
         /// </summary>
         /// <returns></returns>
-        public IndexList AsIndexList() => IndexList.Create(Indices.Where(ind => Math<float>.IsNotZero(ind.Weight)).Select(ind => ind.Index).ToArray());
+        public IndexList AsIndexList() => IndexList.Create([.. Indices.Where(ind => Math<float>.IsNotZero(ind.Weight)).Select(ind => ind.Index)]);
 
         IEnumerable<uint> IHaveIndices.Indices => Indices.Select(ind => ind.Index);
 

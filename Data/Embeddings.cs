@@ -34,7 +34,7 @@ namespace Data
                 return ret;
 
             if (_embeddings.Value.TryGetValue(embedding, out var str)) {
-                _table.Add(embedding, ret = str.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(float.Parse).ToArray()); 
+                _table.Add(embedding, ret = [.. str.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(float.Parse)]); 
                 return ret;
             }
             return [];

@@ -20,7 +20,7 @@ namespace BrightData.Types.Graph.Helper
             return Search(ref graph, shouldVisit, queue, q => q.Count, (q, n) => q.Enqueue(n));
         }
 
-        static IEnumerable<uint> Search<TCollection>(
+        static uint[] Search<TCollection>(
             ref GT graph,
             Func<uint, bool>? shouldVisit,
             TCollection collection,

@@ -46,7 +46,7 @@ namespace BrightData.LinearAlgebra.Clustering
                 nodes.Remove(left);
                 nodes.Remove(right);
             }
-            return nodes.Select(x => x.GetIndices()).ToArray();
+            return [.. nodes.Select(x => x.GetIndices())];
         }
 
         static (LinkedListNode<Node> Left, LinkedListNode<Node> Right)? FindMinimumDistance(

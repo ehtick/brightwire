@@ -208,9 +208,7 @@ namespace BrightData.Helper.Vectors
                     if (i <= j)
                     {
                         // Swap indices[i] and indices[j]
-                        var temp = indices[i];
-                        indices[i] = indices[j];
-                        indices[j] = temp;
+                        (indices[j], indices[i]) = (indices[i], indices[j]);
                         i++;
                         j--;
                     }

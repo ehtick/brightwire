@@ -53,7 +53,7 @@ namespace BrightWire.UnitTests
                 (new[] { "Tokyo", "Japan", "Chinese" }, false),
             };
 
-            return data.Select(r => new IndexListWithLabel<string>(r.Item2 ? "china" : "japan", IndexList.Create(r.Item1.Select(stringTableBuilder.GetIndex)))).ToArray();
+            return [.. data.Select(r => new IndexListWithLabel<string>(r.Item2 ? "china" : "japan", IndexList.Create(r.Item1.Select(stringTableBuilder.GetIndex))))];
         }
 
         static readonly string[] _stringTable = ["Chinese", "Chinese", "Chinese", "Tokyo", "Japan" ];

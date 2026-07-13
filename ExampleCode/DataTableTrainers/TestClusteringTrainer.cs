@@ -127,7 +127,7 @@ namespace ExampleCode.DataTableTrainers
             var (_, floatVector, vt) = matrixT.Svd();
             matrixT.Dispose();
 
-            var s = lap.CreateDiagonalMatrix(floatVector.Segment.Values.Take((int)k).ToArray());
+            var s = lap.CreateDiagonalMatrix([.. floatVector.Segment.Values.Take((int)k)]);
             var v2 = vt.GetNewMatrixFromRows(kIndices);
             using (var sv2 = s.Multiply(v2))
             {
@@ -146,7 +146,7 @@ namespace ExampleCode.DataTableTrainers
 
         string GetOutputPath(string name) => Path.Combine(DataFileDirectory, "output", $"{name}.txt");
 
-        string DataFileDirectory => _context.Get<DirectoryInfo>("DataFileDirectory")?.FullName ?? throw new Exception("Data File Directory not set");
+        string DataFileDirectory => _context.Get<DirectoryInfo>("DataFileDirectory")?.FullName ?? throw new InvalidOperationException("Data File Directory not set");
 
         static void WriteClusters(string filePath, uint[][] clusters, AaaiDocument[] lookupTable)
         {

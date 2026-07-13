@@ -19,7 +19,7 @@ namespace BrightWire.TreeBased
                     string? findChild;
                     if(p.Split.HasValue) {
                         var val = row.Get<float>(p.ColumnIndex.Value);
-                        findChild = val < p.Split.Value ? "-" : "+";
+                        findChild = val < p.Split.Value ? "below" : "above";
                     }else
                         findChild = row.Get<string>(p.ColumnIndex.Value);
 

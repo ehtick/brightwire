@@ -31,10 +31,12 @@ namespace BrightData.Types.Graph
         }
 
         readonly IContinuousDistribution<W> _distribution = context.CreateExponentialDistribution<W>(ml);
-        readonly IWeightedGraph<NodeIndex, W>[] _layers = Enumerable.Range(0, maxLayers)
-            .Select(i => (IWeightedGraph<NodeIndex, W>)(i == 0 ? new FixedSizeWeightedGraph<NodeIndex, W, BLAT>() : new FixedSizeWeightedGraph<NodeIndex, W, AT>()))
-            .ToArray()
-        ;
+        readonly IWeightedGraph<NodeIndex, W>[] _layers = [.. Enumerable.Range(0, maxLayers)
+            .Select(i => (IWeightedGraph<NodeIndex, W>)(i == 0 
+                ? new FixedSizeWeightedGraph<NodeIndex, W, BLAT>() 
+                : new FixedSizeWeightedGraph<NodeIndex, W, AT>()
+            ))
+        ];
         NodeIndex? _entryPoint = null;
 
         /// <summary>

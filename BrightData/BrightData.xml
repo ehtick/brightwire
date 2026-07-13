@@ -675,6 +675,11 @@
             Byte data provider based on memory mapped file
             </summary>
         </member>
+        <member name="M:BrightData.Buffer.ByteDataProviders.FileByteDataProvider.#ctor(System.String)">
+            <summary>
+            Byte data provider based on memory mapped file
+            </summary>
+        </member>
         <member name="T:BrightData.Buffer.ByteDataProviders.MemoryByteDataProvider">
             <summary>
             Byte data provider based on read only memory
@@ -7503,6 +7508,20 @@
             An in-memory generic trie that maintains a prefix shortcut table based on usage
             </summary>
             <typeparam name="T"></typeparam>
+            <remarks>
+            Creates a trie from node data
+            </remarks>
+            <param name="data"></param>
+        </member>
+        <member name="M:BrightData.Helper.StringTables.UniqueIndexedStringTrie`1.#ctor(System.ReadOnlyMemory{BrightData.Helper.StringTables.UniqueIndexedStringTrie{`0}.NodeData})">
+            <summary>
+            An in-memory generic trie that maintains a prefix shortcut table based on usage
+            </summary>
+            <typeparam name="T"></typeparam>
+            <remarks>
+            Creates a trie from node data
+            </remarks>
+            <param name="data"></param>
         </member>
         <member name="T:BrightData.Helper.StringTables.UniqueIndexedStringTrie`1.NodeData">
             <summary>
@@ -7560,12 +7579,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BrightData.Helper.StringTables.UniqueIndexedStringTrie`1.#ctor(System.ReadOnlyMemory{BrightData.Helper.StringTables.UniqueIndexedStringTrie{`0}.NodeData})">
-            <summary>
-            Creates a trie from node data
-            </summary>
-            <param name="data"></param>
-        </member>
         <member name="M:BrightData.Helper.StringTables.UniqueIndexedStringTrie`1.Load(System.String)">
             <summary>
             Loads a string trie from a file
@@ -7622,11 +7635,6 @@
             </summary>
             <typeparam name="T">The wrapped type</typeparam>
         </member>
-        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.Finalize">
-            <summary>
-            Finalizer
-            </summary>
-        </member>
         <member name="M:BrightData.Helper.ThreadSafeHashSet`1.Dispose">
             <inheritdoc />
         </member>
@@ -7636,6 +7644,13 @@
             </summary>
             <param name="item">Item to add</param>
             <returns></returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds all items from the collection in a single lock acquisition
+            </summary>
+            <param name="items">Items to add</param>
+            <returns>Number of items that were newly added</returns>
         </member>
         <member name="M:BrightData.Helper.ThreadSafeHashSet`1.Clear">
             <summary>
@@ -7648,6 +7663,20 @@
             </summary>
             <param name="item">Item to find</param>
             <returns></returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.ContainsAll(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if the set contains all items in the collection
+            </summary>
+            <param name="items">Items to check</param>
+            <returns>True if all items are present</returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.RemoveWhere(System.Predicate{`0})">
+            <summary>
+            Removes the items that match the predicate in a single lock acquisition
+            </summary>
+            <param name="predicate">Predicate to match</param>
+            <returns>Number of items removed</returns>
         </member>
         <member name="M:BrightData.Helper.ThreadSafeHashSet`1.Remove(`0)">
             <summary>
@@ -7663,9 +7692,11 @@
         </member>
         <member name="M:BrightData.Helper.ThreadSafeHashSet`1.ForEach(System.Action{`0})">
             <summary>
-            Applies a callback to each item in the set
+            Applies a callback to each item in the set.
+            Note: A snapshot is taken under the lock, then iterated outside the lock
+            to avoid blocking writers during long-running callbacks.
             </summary>
-            <param name="callback"></param>
+            <param name="callback">Callback to invoke for each item</param>
         </member>
         <member name="M:BrightData.Helper.ThreadSafeHashSet`1.TryPop(`0@)">
             <summary>
@@ -7673,6 +7704,53 @@
             </summary>
             <param name="ret">Item that was removed</param>
             <returns>True if there was an item to remove</returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.UnionWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Modifies the set to contain all elements that are contained in the set, in the other collection, or both.
+            </summary>
+            <param name="other">Collection to union with</param>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.IntersectWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Modifies the set to contain only elements that are also in the specified collection.
+            </summary>
+            <param name="other">Collection to intersect with</param>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.ExceptWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Removes all elements of the specified collection from the set.
+            </summary>
+            <param name="other">Collection to exclude</param>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.SymmetricExceptWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Modifies the set to contain only elements that are present in either the set or the specified collection, but not both.
+            </summary>
+            <param name="other">Collection to symmetrically exclude with</param>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.IsSubsetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Determines whether the set is a subset of the specified collection.
+            </summary>
+            <param name="other">Collection to compare against</param>
+            <returns>True if this set is a subset of other</returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.IsSupersetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Determines whether the set is a superset of the specified collection.
+            </summary>
+            <param name="other">Collection to compare against</param>
+            <returns>True if this set is a superset of other</returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.ToArray">
+            <summary>
+            Returns a snapshot copy of the items in the set
+            </summary>
+            <returns>Array containing all items</returns>
+        </member>
+        <member name="M:BrightData.Helper.ThreadSafeHashSet`1.GetEnumerator">
+            <inheritdoc />
         </member>
         <member name="T:BrightData.Helper.Vectors.VectorBallTree`1">
             <summary>
@@ -21363,11 +21441,21 @@
             <typeparam name="W"></typeparam>
             <typeparam name="AT"></typeparam>
             <typeparam name="T"></typeparam>
+            <remarks>
+            Creates a graph from an array of nodes.
+            </remarks>
+            <param name="nodes"></param>
         </member>
         <member name="M:BrightData.Types.Graph.ReadOnlyFixedSizeWeightedGraph`3.#ctor(BrightData.Types.Graph.Helper.FixedSizeWeightedGraphNode{`0,`1,`2}[])">
             <summary>
-            Creates a graph from an array of nodes.
+            Fixed size weighted graph.
             </summary>
+            <typeparam name="W"></typeparam>
+            <typeparam name="AT"></typeparam>
+            <typeparam name="T"></typeparam>
+            <remarks>
+            Creates a graph from an array of nodes.
+            </remarks>
             <param name="nodes"></param>
         </member>
         <member name="P:BrightData.Types.Graph.ReadOnlyFixedSizeWeightedGraph`3.Size">

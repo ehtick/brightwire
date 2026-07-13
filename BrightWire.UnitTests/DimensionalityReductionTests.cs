@@ -27,7 +27,7 @@ namespace BrightWire.UnitTests
             var reducedSize = 32.AsRange().ToList();
 
             var u = floatMatrix.GetNewMatrixFromRows(reducedSize);
-            var s = _mkl.CreateDiagonalMatrix(floatVector.Segment.Values.Take(reducedSize.Count).ToArray());
+            var s = _mkl.CreateDiagonalMatrix([.. floatVector.Segment.Values.Take(reducedSize.Count)]);
             var vt = floatMatrix1.GetNewMatrixFromColumns(reducedSize);
             var us = u.TransposeThisAndMultiply(s);
             var usvt = us.TransposeAndMultiply(vt);

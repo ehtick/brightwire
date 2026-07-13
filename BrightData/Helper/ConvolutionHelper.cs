@@ -7,8 +7,9 @@ namespace BrightData.Helper
 	/// </summary>
 	public static class ConvolutionHelper
 	{
-		static readonly Dictionary<(uint, uint, uint, uint, uint, uint), List<(uint X, uint Y)>> LeftToRightCache = [];
-		static readonly Dictionary<(uint, uint, uint, uint, uint, uint), List<(uint X, uint Y)>> TopToBottomCache = [];
+		readonly record struct Convolution(uint Width, uint Height, uint FilterWidth, uint FilterHeight, uint StrideX, uint StrideY);
+		static readonly Dictionary<Convolution, List<(uint X, uint Y)>> LeftToRightCache = [];
+		static readonly Dictionary<Convolution, List<(uint X, uint Y)>> TopToBottomCache = [];
 
 		/// <summary>
 		/// Generates convolution indices from left to right
@@ -22,7 +23,7 @@ namespace BrightData.Helper
 		/// <returns>List of (x, y) indices</returns>
 		public static List<(uint X, uint Y)> LeftToRight(uint width, uint height, uint filterWidth, uint filterHeight, uint xStride, uint yStride)
 		{
-			var key = (width, height, filterWidth, filterHeight, xStride, yStride);
+			var key = new Convolution(width, height, filterWidth, filterHeight, xStride, yStride);
 			if (LeftToRightCache.TryGetValue(key, out var ret))
 				return ret;
 
@@ -56,7 +57,7 @@ namespace BrightData.Helper
 		/// <returns>List of (x, y) indices</returns>
 		public static List<(uint X, uint Y)> TopToBottom(uint width, uint height, uint filterWidth, uint filterHeight, uint xStride, uint yStride)
 		{
-			var key = (width, height, filterWidth, filterHeight, xStride, yStride);
+			var key = new Convolution(width, height, filterWidth, filterHeight, xStride, yStride);
 			if (TopToBottomCache.TryGetValue(key, out var ret))
 				return ret;
 

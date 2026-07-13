@@ -34,11 +34,11 @@ namespace BrightWire.ExecutionGraph.Node.Gate
                 }
             }
         }
-        Dictionary<uint, (IMatrix<float> Data, uint ReversedSize, NodeBase ForwardParent)> _input = new();
-        Dictionary<uint, (IMatrix<float> Data, NodeBase ReverseParent)> _reverseInput = new();
+        Dictionary<uint, (IMatrix<float> Data, uint ReversedSize, NodeBase ForwardParent)> _input = [];
+        Dictionary<uint, (IMatrix<float> Data, NodeBase ReverseParent)> _reverseInput = [];
 
-        Dictionary<uint, (NodeBase Node, IGraphData Data)> _reverseBackpropagation = new();
-        Dictionary<uint, IGraphContext> _contextTable = new();
+        Dictionary<uint, (NodeBase Node, IGraphData Data)> _reverseBackpropagation = [];
+        Dictionary<uint, IGraphContext> _contextTable = [];
 
         public ReverseTemporalJoin(string? name, WireBuilder forwardInput, WireBuilder reverseInput) 
             : base(name, forwardInput, reverseInput)
@@ -47,11 +47,10 @@ namespace BrightWire.ExecutionGraph.Node.Gate
 
         public override void OnDeserialise(IReadOnlyDictionary<string, NodeBase> graph)
         {
-            _input = new Dictionary<uint, (IMatrix<float> Data, uint ReversedSize, NodeBase ForwardParent)>();
-            _reverseInput = new Dictionary<uint, (IMatrix<float> Data, NodeBase ReverseParent)>();
-
-            _reverseBackpropagation = new Dictionary<uint, (NodeBase, IGraphData)>();
-            _contextTable = new Dictionary<uint, IGraphContext>();
+            _input = [];
+            _reverseInput = [];
+            _reverseBackpropagation = [];
+            _contextTable = [];
         }
 
         void Continue(IGraphContext context)
@@ -73,13 +72,12 @@ namespace BrightWire.ExecutionGraph.Node.Gate
         protected override (IMatrix<float>? Next, Func<IBackpropagate>? BackProp) Activate(IGraphContext context, List<IncomingChannel> data)
         {
             if (data.Count != 2)
-                throw new Exception("Expected two incoming channels");
+                throw new ArgumentException("Expected two incoming channels", nameof(data));
 
-            var forward = data.First();
-            var backward = data.Last();
-
+            var forward = data[0];
+            var backward = data[^1];
             if (forward.Data == null || backward.Data == null)
-                throw new Exception("Expected incoming channels to have data");
+                throw new ArgumentException("Expected incoming channels to have data", nameof(data));
 
             var sequenceIndex = context.BatchSequence.SequenceIndex;
             var reversedSequenceIndex = context.BatchSequence.MiniBatch.SequenceCount - sequenceIndex - 1;

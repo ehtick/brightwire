@@ -29,7 +29,7 @@ namespace BrightData.Types.Graph
         }
 
         /// <inheritdoc />
-        public void Dispose()
+        public readonly void Dispose()
         {
             _nodes.Dispose();
             _edges.Dispose();

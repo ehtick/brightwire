@@ -27,7 +27,7 @@ namespace BrightWire.Bayesian
                 return score;
             }
         }
-        readonly List<Classification> _classification = model.ClassData.Select(c => new Classification(c)).ToList();
+        readonly List<Classification> _classification = [.. model.ClassData.Select(c => new Classification(c))];
 
         IEnumerable<(string Classification, double Score)> Classify(ReadOnlyMemory<uint> stringIndexList)
         {

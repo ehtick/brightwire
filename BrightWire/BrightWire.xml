@@ -4555,26 +4555,67 @@
         </member>
         <member name="T:BrightWire.Models.ConfusionMatrix">
             <summary>
-            
+            Represents a confusion matrix for evaluating classification model performance.
+            Maps expected classifications against actual classifications with occurrence counts.
             </summary>
         </member>
         <member name="T:BrightWire.Models.ConfusionMatrix.ActualClassification">
             <summary>
-            
+            Represents an actual classification result within an expected classification group.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.ActualClassification.ClassificationIndex">
+            <summary>
+            The index of the actual classification into the label array.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.ActualClassification.Count">
+            <summary>
+            The number of times this actual classification occurred.
             </summary>
         </member>
         <member name="T:BrightWire.Models.ConfusionMatrix.ExpectedClassification">
             <summary>
-            
+            Represents an expected (true) classification group containing actual classification results.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.ExpectedClassification.ClassificationIndex">
+            <summary>
+            The index of the expected classification into the label array.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.ExpectedClassification.ActualClassifications">
+            <summary>
+            Array of actual classifications observed for this expected classification.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.ClassificationLabels">
+            <summary>
+            Labels for each classification, indexed by classification index.
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.Classifications">
+            <summary>
+            Array of expected classifications, each containing the actual classification breakdown.
+            </summary>
+        </member>
+        <member name="M:BrightWire.Models.ConfusionMatrix.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:BrightWire.Models.ConfusionMatrix.AsXml">
+            <summary>
+            Returns the confusion matrix serialized as an XML string.
             </summary>
         </member>
         <member name="M:BrightWire.Models.ConfusionMatrix.GetCount(System.String,System.String)">
             <summary>
-            Returns the count of the expected vs actual classifications
+            Returns the count of a given expected versus actual classification pair.
             </summary>
-            <param name="expected">Expected classification label</param>
-            <param name="actual">Actual classification label</param>
-            <returns></returns>
+            <param name="expected">The label of the expected (true) classification.</param>
+            <param name="actual">The label of the actual (predicted) classification.</param>
+            <returns>The count of occurrences, or zero if either label is not recognized.</returns>
         </member>
         <member name="T:BrightWire.Models.DataSourceModel">
             <summary>
@@ -5147,11 +5188,18 @@
             <summary>
             Binary reader for big endian streams
             </summary>
+            <remarks>
+            Creates a new big endian binary reader
+            </remarks>
+            <param name="stream"></param>
         </member>
         <member name="M:BrightWire.TrainingData.Helper.BigEndianBinaryReader.#ctor(System.IO.Stream)">
             <summary>
-            Creates a new big endian binary reader
+            Binary reader for big endian streams
             </summary>
+            <remarks>
+            Creates a new big endian binary reader
+            </remarks>
             <param name="stream"></param>
         </member>
         <member name="M:BrightWire.TrainingData.Helper.BigEndianBinaryReader.ReadInt32">
@@ -5333,22 +5381,266 @@
         </member>
         <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer">
             <summary>
-            Decision tree classifier
-            https://en.wikipedia.org/wiki/Decision_tree_learning
+            Trains decision tree models using an entropy-based splitting criterion.
+            Implements the ID3/CART family of algorithms where the best split at each node
+            is chosen by maximizing information gain (reduction in entropy).
+            </summary>
+            <remarks>
+            Reference: https://en.wikipedia.org/wiki/Decision_tree_learning
+            </remarks>
+        </member>
+        <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute">
+            <summary>
+            Represents a single attribute split during tree construction.
+            A split is either a categorical value match or a numeric threshold comparison.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.#ctor(System.UInt32,System.String)">
+            <summary>
+            Creates a categorical attribute split that matches a specific category value.
+            </summary>
+            <param name="columnIndex">The column to split on.</param>
+            <param name="category">The category value to match.</param>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.#ctor(System.UInt32,System.Double)">
+            <summary>
+            Creates a numeric attribute split using a threshold comparison.
+            </summary>
+            <param name="columnIndex">The column to split on.</param>
+            <param name="split">The threshold value. Values below go left, values above go right.</param>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.ColumnIndex">
+            <summary>
+            Gets the column index this attribute split operates on.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.Category">
+            <summary>
+            Gets the category value for categorical splits, or null for numeric splits.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.Split">
+            <summary>
+            Gets the threshold value for numeric splits, or null for categorical splits.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.Partition(System.Collections.Generic.IEnumerable{BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow})">
+            <summary>
+            Partitions the given rows into groups based on this attribute split.
+            </summary>
+            <param name="rows">The rows to partition.</param>
+            <returns>A dictionary mapping partition labels to the rows belonging to each partition.</returns>
+        </member>
+        <member name="F:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.LabelBelow">
+            <summary>
+            Label used for rows below the numeric threshold.
+            </summary>
+        </member>
+        <member name="F:BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute.LabelAbove">
+            <summary>
+            Label used for rows at or above the numeric threshold.
+            </summary>
+        </member>
+        <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow">
+            <summary>
+            An in-memory representation of a single training row.
+            Stores pre-extracted categorical and continuous values for fast access during tree construction.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow.#ctor(BrightData.DataTable.Rows.GenericTableRow,System.Collections.Generic.HashSet{System.UInt32},System.Collections.Generic.HashSet{System.UInt32},System.UInt32)">
+            <summary>
+            Creates an in-memory row by extracting the relevant columns from a data table row.
+            </summary>
+            <param name="row">The source data table row.</param>
+            <param name="categorical">Column indices that are categorical.</param>
+            <param name="continuous">Column indices that are continuous/numeric.</param>
+            <param name="classColumnIndex">The index of the classification label column.</param>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow.ClassificationLabel">
+            <summary>
+            Gets the classification label for this row.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow.GetCategory(System.UInt32)">
+            <summary>
+            Gets the categorical value for the specified column.
+            </summary>
+            <param name="columnIndex">The column index.</param>
+            <returns>The category string.</returns>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow.GetValue(System.UInt32)">
+            <summary>
+            Gets the numeric value for the specified column.
+            </summary>
+            <param name="columnIndex">The column index.</param>
+            <returns>The numeric value.</returns>
+        </member>
+        <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo">
+            <summary>
+            Holds metadata about the training data table, including column classifications and in-memory row data.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo.#ctor(BrightData.IDataTable)">
+            <summary>
+            Analyzes the data table and extracts all rows into memory for fast access during tree construction.
+            </summary>
+            <param name="table">The training data table.</param>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo.CategoricalColumns">
+            <summary>
+            Gets the collection of categorical column indices.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo.ContinuousColumns">
+            <summary>
+            Gets the collection of continuous (numeric) column indices.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo.Data">
+            <summary>
+            Gets the in-memory representation of all training rows.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo.ClassColumnIndex">
+            <summary>
+            Gets the column index of the classification label column.
+            </summary>
+        </member>
+        <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node">
+            <summary>
+            Represents a single node in the decision tree during construction.
+            Tracks the data subset, computed attributes, entropy, and parent-child relationships.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.#ctor(BrightWire.TreeBased.Training.DecisionTreeTrainer.TableInfo,System.Collections.Generic.List{BrightWire.TreeBased.Training.DecisionTreeTrainer.InMemoryRow},System.String)">
+            <summary>
+            Creates a new tree node for the given data subset.
+            </summary>
+            <param name="tableInfo">Metadata about the training table.</param>
+            <param name="data">The rows assigned to this node.</param>
+            <param name="matchLabel">The partition label that led to this node, or null for the root.</param>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.AsDecisionTreeNode">
+            <summary>
+            Converts this internal node to a public DecisionTree.Node for the final model.
+            </summary>
+            <returns>A serializable decision tree node.</returns>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.Attributes">
+            <summary>
+            Gets the candidate split attributes available at this node.
+            Computed once and cached for subsequent accesses.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.Entropy">
+            <summary>
+            Gets the entropy of the class distribution at this node.
+            Entropy is calculated as H = -sum(p * log2(p)) for each class probability p.
+            </summary>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.SetAttribute(BrightWire.TreeBased.Training.DecisionTreeTrainer.Attribute,BrightWire.TreeBased.Training.DecisionTreeTrainer.Node[])">
+            <summary>
+            Sets the split attribute and children for this node, finalizing the node as an internal node.
+            </summary>
+            <param name="attribute">The attribute to split on.</param>
+            <param name="children">The child nodes resulting from the split.</param>
+            <returns>The children array.</returns>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.Depth">
+            <summary>
+            Gets the depth of this node in the tree (root is depth 0).
+            Cached at assignment time for O(1) access.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.Leaves">
+            <summary>
+            Gets the number of leaf nodes in the subtree rooted at this node.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.IsLeaf">
+            <summary>
+            Gets a value indicating whether this node is a leaf (pure or single-class).
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.PredictedClass">
+            <summary>
+            Gets the predicted class label for this node (the majority class).
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.Data">
+            <summary>
+            Gets the training rows assigned to this node.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Node.MatchLabel">
+            <summary>
+            Gets the partition label that routes to this node, or null for the root.
             </summary>
         </member>
         <member name="T:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config">
             <summary>
-            Decision tree configuration
+            Configuration options for decision tree training.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config.FeatureBagCount">
+            <summary>
+            Gets or sets the number of features to include in each random feature bag.
+            When set, a random subset of this many features is considered at each split.
+            Use with random forest training to decorrelate trees.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config.MinDataPerNode">
+            <summary>
+            Gets or sets the minimum number of training samples required to attempt a split at a node.
+            Nodes with fewer samples than this threshold become leaves.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config.MaxDepth">
+            <summary>
+            Gets or sets the maximum depth of the tree.
+            Nodes at or beyond this depth become leaves.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config.MinInformationGain">
+            <summary>
+            Gets or sets the minimum information gain required to perform a split.
+            Splits that produce less gain than this threshold are discarded.
+            </summary>
+        </member>
+        <member name="P:BrightWire.TreeBased.Training.DecisionTreeTrainer.Config.MaxAttributes">
+            <summary>
+            Gets or sets the maximum number of attributes to consider at each split.
+            When set without FeatureBagCount, a random subset of attributes is selected.
+            When set with FeatureBagCount, this value overrides the bag size.
             </summary>
         </member>
         <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.Train(BrightData.IDataTable,BrightWire.TreeBased.Training.DecisionTreeTrainer.Config)">
             <summary>
-            Trains a decision tree
+            Trains a decision tree on the provided data table.
             </summary>
-            <param name="table">Training data</param>
-            <param name="config">Decision tree configuration</param>
-            <returns></returns>
+            <param name="table">The training data table. Must have a target column set.</param>
+            <param name="config">Optional configuration for controlling tree growth. Defaults to unrestricted growth.</param>
+            <returns>A trained <see cref="T:BrightWire.Models.TreeBased.DecisionTree"/> model.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when table is null.</exception>
+        </member>
+        <member name="M:BrightWire.TreeBased.Training.DecisionTreeTrainer.GetInformationGain(System.Double,System.Double,BrightWire.TreeBased.Training.DecisionTreeTrainer.Node[])">
+            <summary>
+            Calculates the weighted information gain achieved by splitting a node into children.
+            Information gain is the parent entropy minus the weighted average of child entropies.
+            </summary>
+            <param name="setEntropy">The entropy of the parent node.</param>
+            <param name="setCount">The total number of samples in the parent node.</param>
+            <param name="splits">The child nodes produced by the split.</param>
+            <returns>The information gain from the split.</returns>
         </member>
         <member name="T:BrightWire.TreeBased.Training.RandomForestTrainer">
             <summary>

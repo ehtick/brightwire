@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -6,48 +7,90 @@ using System.Xml;
 
 namespace BrightWire.Models
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	public class ConfusionMatrix
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		public class ActualClassification
-		{
-			public int ClassificationIndex { get; set; }
+    /// <summary>
+    /// Represents a confusion matrix for evaluating classification model performance.
+    /// Maps expected classifications against actual classifications with occurrence counts.
+    /// </summary>
+    public class ConfusionMatrix
+    {
+        /// <summary>
+        /// Represents an actual classification result within an expected classification group.
+        /// </summary>
+        public class ActualClassification
+        {
+            /// <summary>
+            /// The index of the actual classification into the label array.
+            /// </summary>
+            public int ClassificationIndex { get; set; }
 
-			public uint Count { get; set; }
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public class ExpectedClassification
-		{
-			public int ClassificationIndex { get; set; }
-
-            public ActualClassification[] ActualClassifications { get; set; } = [];
+            /// <summary>
+            /// The number of times this actual classification occurred.
+            /// </summary>
+            public uint Count { get; set; }
         }
 
+        /// <summary>
+        /// Represents an expected (true) classification group containing actual classification results.
+        /// </summary>
+        public class ExpectedClassification
+        {
+            /// <summary>
+            /// The index of the expected classification into the label array.
+            /// </summary>
+            public int ClassificationIndex { get; set; }
+
+            /// <summary>
+            /// Array of actual classifications observed for this expected classification.
+            /// </summary>
+            public ActualClassification[] ActualClassifications { get; set; } = [];
+        }
+        readonly Lazy<Dictionary<string, int>> _classificationTable;
+
+        /// <summary>
+        /// Labels for each classification, indexed by classification index.
+        /// </summary>
         public string[] ClassificationLabels { get; set; } = [];
 
+        /// <summary>
+        /// Array of expected classifications, each containing the actual classification breakdown.
+        /// </summary>
         public ExpectedClassification[] Classifications { get; set; } = [];
 
-		public string AsXml
-		{
-			get
-			{
-				var ret = new StringBuilder();
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ConfusionMatrix()
+        {
+            _classificationTable = new(() => ClassificationLabels
+                .Select((c, i) => (c, i))
+                .ToDictionary(d => d.c, d => d.i))
+            ;
+        }
+
+        /// <summary>
+        /// Returns the confusion matrix serialized as an XML string.
+        /// </summary>
+        public string AsXml
+        {
+            get
+            {
+                var ret = new StringBuilder();
                 using var writer = XmlWriter.Create(new StringWriter(ret));
                 writer.WriteStartElement("confusion-matrix");
-                foreach (var expected in Classifications) {
+                foreach (var expected in Classifications)
+                {
                     writer.WriteStartElement("expected-classification");
-                    writer.WriteAttributeString("label", ClassificationLabels[expected.ClassificationIndex]);
-                    foreach (var actual in expected.ActualClassifications) {
+                    writer.WriteAttributeString("label",
+                        expected.ClassificationIndex >= 0 && expected.ClassificationIndex < ClassificationLabels.Length
+                            ? ClassificationLabels[expected.ClassificationIndex]
+                            : "unknown");
+                    foreach (var actual in expected.ActualClassifications)
+                    {
                         writer.WriteStartElement("actual-classification");
-                        writer.WriteAttributeString("label", ClassificationLabels[actual.ClassificationIndex]);
+                        writer.WriteAttributeString("label",
+                            actual.ClassificationIndex >= 0 && actual.ClassificationIndex < ClassificationLabels.Length
+                                ? ClassificationLabels[actual.ClassificationIndex]
+                                : "unknown");
                         writer.WriteAttributeString("count", actual.Count.ToString());
                         writer.WriteEndElement();
                     }
@@ -55,43 +98,33 @@ namespace BrightWire.Models
                 }
                 writer.WriteEndElement();
                 return ret.ToString();
-			}
-		}
+            }
+        }
 
-		Dictionary<string, int>? _classificationTable = null;
-		Dictionary<string, int> ClassificationTable
-		{
-			get
-			{
-				if(_classificationTable == null) {
-					lock(this) {
-                        _classificationTable ??= ClassificationLabels
-                            .Select((c, i) => (c, i))
-                            .ToDictionary(d => d.c, d => d.i);
-                    }
-				}
-				return _classificationTable;
-			}
-		}
+        Dictionary<string, int> ClassificationTable => _classificationTable.Value;
 
-		/// <summary>
-		/// Returns the count of the expected vs actual classifications
-		/// </summary>
-		/// <param name="expected">Expected classification label</param>
-		/// <param name="actual">Actual classification label</param>
-		/// <returns></returns>
-		public uint GetCount(string expected, string actual)
-		{
-			var expectedIndex = ClassificationTable[expected];
-			var expectedClassification = Classifications.FirstOrDefault(c => c.ClassificationIndex == expectedIndex);
-			if (expectedClassification != null) {
-				var actualIndex = ClassificationTable[actual];
-				var actualClassification = expectedClassification.ActualClassifications.FirstOrDefault(c => c.ClassificationIndex == actualIndex);
-				if (actualClassification != null)
-					return actualClassification.Count;
-			}
+        /// <summary>
+        /// Returns the count of a given expected versus actual classification pair.
+        /// </summary>
+        /// <param name="expected">The label of the expected (true) classification.</param>
+        /// <param name="actual">The label of the actual (predicted) classification.</param>
+        /// <returns>The count of occurrences, or zero if either label is not recognized.</returns>
+        public uint GetCount(string expected, string actual)
+        {
+            if (!ClassificationTable.TryGetValue(expected, out int expectedIndex))
+                return 0;
+            if (!ClassificationTable.TryGetValue(actual, out int actualIndex))
+                return 0;
 
-			return 0;
-		}
-	}
+            var expectedClassification = Classifications.FirstOrDefault(c => c.ClassificationIndex == expectedIndex);
+            if (expectedClassification != null)
+            {
+                var actualClassification = expectedClassification.ActualClassifications.FirstOrDefault(c => c.ClassificationIndex == actualIndex);
+                if (actualClassification != null)
+                    return actualClassification.Count;
+            }
+
+            return 0;
+        }
+    }
 }

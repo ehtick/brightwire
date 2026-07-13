@@ -22,7 +22,7 @@ namespace BrightWire.Bayesian
                 var included = new HashSet<uint>();
                 foreach (var item in cls.Index)
                     included.Add(item.StringIndex);
-                _excluded = vocabulary.Where(w => !included.Contains(w)).ToList();
+                _excluded = [.. vocabulary.Where(w => !included.Contains(w))];
             }
             public string Label => _class.Label;
 

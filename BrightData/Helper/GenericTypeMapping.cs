@@ -24,6 +24,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ToStringConverter<bool>((IReadOnlyBuffer<bool>)buffer);
+			if(typeCode == TypeCode.Byte)
+				return new ToStringConverter<byte>((IReadOnlyBuffer<byte>)buffer);
 			if(typeCode == TypeCode.SByte)
 				return new ToStringConverter<sbyte>((IReadOnlyBuffer<sbyte>)buffer);
 			if(typeCode == TypeCode.Single)
@@ -42,6 +44,12 @@ namespace BrightData.Helper
 				return new ToStringConverter<long>((IReadOnlyBuffer<long>)buffer);
 			if(typeCode == TypeCode.DateTime)
 				return new ToStringConverter<DateTime>((IReadOnlyBuffer<DateTime>)buffer);
+			if(typeCode == TypeCode.UInt16)
+				return new ToStringConverter<ushort>((IReadOnlyBuffer<ushort>)buffer);
+			if(typeCode == TypeCode.UInt32)
+				return new ToStringConverter<uint>((IReadOnlyBuffer<uint>)buffer);
+			if(typeCode == TypeCode.UInt64)
+				return new ToStringConverter<ulong>((IReadOnlyBuffer<ulong>)buffer);
 			if(type == typeof(IndexList))
 				return new ToStringConverter<IndexList>((IReadOnlyBuffer<IndexList>)buffer);
 			if(type == typeof(WeightedIndexList))
@@ -70,6 +78,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToStringFrequencyAnalysis<bool>(writeCount);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToStringFrequencyAnalysis<byte>(writeCount);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToStringFrequencyAnalysis<sbyte>(writeCount);
 			if(typeCode == TypeCode.Single)
@@ -88,6 +98,12 @@ namespace BrightData.Helper
 				return new ConvertToStringFrequencyAnalysis<long>(writeCount);
 			if(typeCode == TypeCode.DateTime)
 				return new ConvertToStringFrequencyAnalysis<DateTime>(writeCount);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToStringFrequencyAnalysis<ushort>(writeCount);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToStringFrequencyAnalysis<uint>(writeCount);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToStringFrequencyAnalysis<ulong>(writeCount);
 			if(type == typeof(IndexList))
 				return new ConvertToStringFrequencyAnalysis<IndexList>(writeCount);
 			if(type == typeof(WeightedIndexList))
@@ -117,6 +133,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ToObjectConverter<bool>((IReadOnlyBuffer<bool>)from);
+			if(typeCode == TypeCode.Byte)
+				return new ToObjectConverter<byte>((IReadOnlyBuffer<byte>)from);
 			if(typeCode == TypeCode.SByte)
 				return new ToObjectConverter<sbyte>((IReadOnlyBuffer<sbyte>)from);
 			if(typeCode == TypeCode.Single)
@@ -135,6 +153,12 @@ namespace BrightData.Helper
 				return new ToObjectConverter<long>((IReadOnlyBuffer<long>)from);
 			if(typeCode == TypeCode.DateTime)
 				return new ToObjectConverter<DateTime>((IReadOnlyBuffer<DateTime>)from);
+			if(typeCode == TypeCode.UInt16)
+				return new ToObjectConverter<ushort>((IReadOnlyBuffer<ushort>)from);
+			if(typeCode == TypeCode.UInt32)
+				return new ToObjectConverter<uint>((IReadOnlyBuffer<uint>)from);
+			if(typeCode == TypeCode.UInt64)
+				return new ToObjectConverter<ulong>((IReadOnlyBuffer<ulong>)from);
 			if(type == typeof(IndexList))
 				return new ToObjectConverter<IndexList>((IReadOnlyBuffer<IndexList>)from);
 			if(type == typeof(WeightedIndexList))
@@ -892,6 +916,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new IndexedCopyOperation<bool>((IReadOnlyBuffer<bool>)from, (IAppendToBuffer<bool>)to, indices);
+			if(typeCode == TypeCode.Byte)
+				return new IndexedCopyOperation<byte>((IReadOnlyBuffer<byte>)from, (IAppendToBuffer<byte>)to, indices);
 			if(typeCode == TypeCode.SByte)
 				return new IndexedCopyOperation<sbyte>((IReadOnlyBuffer<sbyte>)from, (IAppendToBuffer<sbyte>)to, indices);
 			if(typeCode == TypeCode.Single)
@@ -910,6 +936,12 @@ namespace BrightData.Helper
 				return new IndexedCopyOperation<long>((IReadOnlyBuffer<long>)from, (IAppendToBuffer<long>)to, indices);
 			if(typeCode == TypeCode.DateTime)
 				return new IndexedCopyOperation<DateTime>((IReadOnlyBuffer<DateTime>)from, (IAppendToBuffer<DateTime>)to, indices);
+			if(typeCode == TypeCode.UInt16)
+				return new IndexedCopyOperation<ushort>((IReadOnlyBuffer<ushort>)from, (IAppendToBuffer<ushort>)to, indices);
+			if(typeCode == TypeCode.UInt32)
+				return new IndexedCopyOperation<uint>((IReadOnlyBuffer<uint>)from, (IAppendToBuffer<uint>)to, indices);
+			if(typeCode == TypeCode.UInt64)
+				return new IndexedCopyOperation<ulong>((IReadOnlyBuffer<ulong>)from, (IAppendToBuffer<ulong>)to, indices);
 			if(type == typeof(IndexList))
 				return new IndexedCopyOperation<IndexList>((IReadOnlyBuffer<IndexList>)from, (IAppendToBuffer<IndexList>)to, indices);
 			if(type == typeof(WeightedIndexList))
@@ -939,6 +971,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new BufferCopyOperation<bool>((IReadOnlyBuffer<bool>)from, (IAppendBlocks<bool>)to, onComplete);
+			if(typeCode == TypeCode.Byte)
+				return new BufferCopyOperation<byte>((IReadOnlyBuffer<byte>)from, (IAppendBlocks<byte>)to, onComplete);
 			if(typeCode == TypeCode.SByte)
 				return new BufferCopyOperation<sbyte>((IReadOnlyBuffer<sbyte>)from, (IAppendBlocks<sbyte>)to, onComplete);
 			if(typeCode == TypeCode.Single)
@@ -957,6 +991,12 @@ namespace BrightData.Helper
 				return new BufferCopyOperation<long>((IReadOnlyBuffer<long>)from, (IAppendBlocks<long>)to, onComplete);
 			if(typeCode == TypeCode.DateTime)
 				return new BufferCopyOperation<DateTime>((IReadOnlyBuffer<DateTime>)from, (IAppendBlocks<DateTime>)to, onComplete);
+			if(typeCode == TypeCode.UInt16)
+				return new BufferCopyOperation<ushort>((IReadOnlyBuffer<ushort>)from, (IAppendBlocks<ushort>)to, onComplete);
+			if(typeCode == TypeCode.UInt32)
+				return new BufferCopyOperation<uint>((IReadOnlyBuffer<uint>)from, (IAppendBlocks<uint>)to, onComplete);
+			if(typeCode == TypeCode.UInt64)
+				return new BufferCopyOperation<ulong>((IReadOnlyBuffer<ulong>)from, (IAppendBlocks<ulong>)to, onComplete);
 			if(type == typeof(IndexList))
 				return new BufferCopyOperation<IndexList>((IReadOnlyBuffer<IndexList>)from, (IAppendBlocks<IndexList>)to, onComplete);
 			if(type == typeof(WeightedIndexList))
@@ -986,6 +1026,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new SimpleNumericAnalysis<bool>((IReadOnlyBuffer<bool>)buffer);
+			if(typeCode == TypeCode.Byte)
+				return new SimpleNumericAnalysis<byte>((IReadOnlyBuffer<byte>)buffer);
 			if(typeCode == TypeCode.SByte)
 				return new SimpleNumericAnalysis<sbyte>((IReadOnlyBuffer<sbyte>)buffer);
 			if(typeCode == TypeCode.Single)
@@ -1004,6 +1046,12 @@ namespace BrightData.Helper
 				return new SimpleNumericAnalysis<long>((IReadOnlyBuffer<long>)buffer);
 			if(typeCode == TypeCode.DateTime)
 				return new SimpleNumericAnalysis<DateTime>((IReadOnlyBuffer<DateTime>)buffer);
+			if(typeCode == TypeCode.UInt16)
+				return new SimpleNumericAnalysis<ushort>((IReadOnlyBuffer<ushort>)buffer);
+			if(typeCode == TypeCode.UInt32)
+				return new SimpleNumericAnalysis<uint>((IReadOnlyBuffer<uint>)buffer);
+			if(typeCode == TypeCode.UInt64)
+				return new SimpleNumericAnalysis<ulong>((IReadOnlyBuffer<ulong>)buffer);
 			if(type == typeof(IndexList))
 				return new SimpleNumericAnalysis<IndexList>((IReadOnlyBuffer<IndexList>)buffer);
 			if(type == typeof(WeightedIndexList))
@@ -1032,6 +1080,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToDecimal<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToDecimal<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToDecimal<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1046,6 +1096,12 @@ namespace BrightData.Helper
 				return new ConvertToDecimal<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToDecimal<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToDecimal<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToDecimal<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToDecimal<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToDecimal<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToDecimal for type {type}");
@@ -1056,6 +1112,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToDouble<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToDouble<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToDouble<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1070,6 +1128,12 @@ namespace BrightData.Helper
 				return new ConvertToDouble<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToDouble<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToDouble<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToDouble<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToDouble<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToDouble<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToDouble for type {type}");
@@ -1080,6 +1144,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToFloat<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToFloat<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToFloat<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1094,6 +1160,12 @@ namespace BrightData.Helper
 				return new ConvertToFloat<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToFloat<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToFloat<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToFloat<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToFloat<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToFloat<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToFloat for type {type}");
@@ -1104,6 +1176,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToInt<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToInt<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToInt<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1118,6 +1192,12 @@ namespace BrightData.Helper
 				return new ConvertToInt<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToInt<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToInt<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToInt<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToInt<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToInt<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToInt for type {type}");
@@ -1128,6 +1208,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToLong<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToLong<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToLong<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1142,6 +1224,12 @@ namespace BrightData.Helper
 				return new ConvertToLong<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToLong<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToLong<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToLong<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToLong<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToLong<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToLong for type {type}");
@@ -1152,6 +1240,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToShort<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToShort<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToShort<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1166,6 +1256,12 @@ namespace BrightData.Helper
 				return new ConvertToShort<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToShort<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToShort<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToShort<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToShort<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToShort<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToShort for type {type}");
@@ -1176,6 +1272,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ConvertToSignedByte<bool>(throwOnFailure);
+			if(typeCode == TypeCode.Byte)
+				return new ConvertToSignedByte<byte>(throwOnFailure);
 			if(typeCode == TypeCode.SByte)
 				return new ConvertToSignedByte<sbyte>(throwOnFailure);
 			if(typeCode == TypeCode.Single)
@@ -1190,6 +1288,12 @@ namespace BrightData.Helper
 				return new ConvertToSignedByte<int>(throwOnFailure);
 			if(typeCode == TypeCode.Int64)
 				return new ConvertToSignedByte<long>(throwOnFailure);
+			if(typeCode == TypeCode.UInt16)
+				return new ConvertToSignedByte<ushort>(throwOnFailure);
+			if(typeCode == TypeCode.UInt32)
+				return new ConvertToSignedByte<uint>(throwOnFailure);
+			if(typeCode == TypeCode.UInt64)
+				return new ConvertToSignedByte<ulong>(throwOnFailure);
 			if(typeCode == TypeCode.String)
 				return new ConvertToSignedByte<string>(throwOnFailure);
 			throw new NotImplementedException($"Could not create ConvertToSignedByte for type {type}");
@@ -1200,6 +1304,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new ColumnFilter<bool>(columnIndex, columnType, (IDataTypeSpecification<bool>)typeSpecification, nonConformingRowIndices);
+			if(typeCode == TypeCode.Byte)
+				return new ColumnFilter<byte>(columnIndex, columnType, (IDataTypeSpecification<byte>)typeSpecification, nonConformingRowIndices);
 			if(typeCode == TypeCode.SByte)
 				return new ColumnFilter<sbyte>(columnIndex, columnType, (IDataTypeSpecification<sbyte>)typeSpecification, nonConformingRowIndices);
 			if(typeCode == TypeCode.Single)
@@ -1218,6 +1324,12 @@ namespace BrightData.Helper
 				return new ColumnFilter<long>(columnIndex, columnType, (IDataTypeSpecification<long>)typeSpecification, nonConformingRowIndices);
 			if(typeCode == TypeCode.DateTime)
 				return new ColumnFilter<DateTime>(columnIndex, columnType, (IDataTypeSpecification<DateTime>)typeSpecification, nonConformingRowIndices);
+			if(typeCode == TypeCode.UInt16)
+				return new ColumnFilter<ushort>(columnIndex, columnType, (IDataTypeSpecification<ushort>)typeSpecification, nonConformingRowIndices);
+			if(typeCode == TypeCode.UInt32)
+				return new ColumnFilter<uint>(columnIndex, columnType, (IDataTypeSpecification<uint>)typeSpecification, nonConformingRowIndices);
+			if(typeCode == TypeCode.UInt64)
+				return new ColumnFilter<ulong>(columnIndex, columnType, (IDataTypeSpecification<ulong>)typeSpecification, nonConformingRowIndices);
 			if(type == typeof(IndexList))
 				return new ColumnFilter<IndexList>(columnIndex, columnType, (IDataTypeSpecification<IndexList>)typeSpecification, nonConformingRowIndices);
 			if(type == typeof(WeightedIndexList))
@@ -1247,6 +1359,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new TypedIndexer<bool>((IReadOnlyBuffer<bool>)buffer);
+			if(typeCode == TypeCode.Byte)
+				return new TypedIndexer<byte>((IReadOnlyBuffer<byte>)buffer);
 			if(typeCode == TypeCode.SByte)
 				return new TypedIndexer<sbyte>((IReadOnlyBuffer<sbyte>)buffer);
 			if(typeCode == TypeCode.Single)
@@ -1265,6 +1379,12 @@ namespace BrightData.Helper
 				return new TypedIndexer<long>((IReadOnlyBuffer<long>)buffer);
 			if(typeCode == TypeCode.DateTime)
 				return new TypedIndexer<DateTime>((IReadOnlyBuffer<DateTime>)buffer);
+			if(typeCode == TypeCode.UInt16)
+				return new TypedIndexer<ushort>((IReadOnlyBuffer<ushort>)buffer);
+			if(typeCode == TypeCode.UInt32)
+				return new TypedIndexer<uint>((IReadOnlyBuffer<uint>)buffer);
+			if(typeCode == TypeCode.UInt64)
+				return new TypedIndexer<ulong>((IReadOnlyBuffer<ulong>)buffer);
 			if(type == typeof(IndexList))
 				return new TypedIndexer<IndexList>((IReadOnlyBuffer<IndexList>)buffer);
 			if(type == typeof(WeightedIndexList))
@@ -1294,6 +1414,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new OneHotConverter<bool>((IReadOnlyBuffer<bool>)buffer, (ICanIndex<bool>)indexer);
+			if(typeCode == TypeCode.Byte)
+				return new OneHotConverter<byte>((IReadOnlyBuffer<byte>)buffer, (ICanIndex<byte>)indexer);
 			if(typeCode == TypeCode.SByte)
 				return new OneHotConverter<sbyte>((IReadOnlyBuffer<sbyte>)buffer, (ICanIndex<sbyte>)indexer);
 			if(typeCode == TypeCode.Single)
@@ -1312,6 +1434,12 @@ namespace BrightData.Helper
 				return new OneHotConverter<long>((IReadOnlyBuffer<long>)buffer, (ICanIndex<long>)indexer);
 			if(typeCode == TypeCode.DateTime)
 				return new OneHotConverter<DateTime>((IReadOnlyBuffer<DateTime>)buffer, (ICanIndex<DateTime>)indexer);
+			if(typeCode == TypeCode.UInt16)
+				return new OneHotConverter<ushort>((IReadOnlyBuffer<ushort>)buffer, (ICanIndex<ushort>)indexer);
+			if(typeCode == TypeCode.UInt32)
+				return new OneHotConverter<uint>((IReadOnlyBuffer<uint>)buffer, (ICanIndex<uint>)indexer);
+			if(typeCode == TypeCode.UInt64)
+				return new OneHotConverter<ulong>((IReadOnlyBuffer<ulong>)buffer, (ICanIndex<ulong>)indexer);
 			if(type == typeof(IndexList))
 				return new OneHotConverter<IndexList>((IReadOnlyBuffer<IndexList>)buffer, (ICanIndex<IndexList>)indexer);
 			if(type == typeof(WeightedIndexList))
@@ -1341,6 +1469,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new CategoricalIndexConverter<bool>((IReadOnlyBuffer<bool>)buffer, (ICanIndex<bool>)indexer);
+			if(typeCode == TypeCode.Byte)
+				return new CategoricalIndexConverter<byte>((IReadOnlyBuffer<byte>)buffer, (ICanIndex<byte>)indexer);
 			if(typeCode == TypeCode.SByte)
 				return new CategoricalIndexConverter<sbyte>((IReadOnlyBuffer<sbyte>)buffer, (ICanIndex<sbyte>)indexer);
 			if(typeCode == TypeCode.Single)
@@ -1359,6 +1489,12 @@ namespace BrightData.Helper
 				return new CategoricalIndexConverter<long>((IReadOnlyBuffer<long>)buffer, (ICanIndex<long>)indexer);
 			if(typeCode == TypeCode.DateTime)
 				return new CategoricalIndexConverter<DateTime>((IReadOnlyBuffer<DateTime>)buffer, (ICanIndex<DateTime>)indexer);
+			if(typeCode == TypeCode.UInt16)
+				return new CategoricalIndexConverter<ushort>((IReadOnlyBuffer<ushort>)buffer, (ICanIndex<ushort>)indexer);
+			if(typeCode == TypeCode.UInt32)
+				return new CategoricalIndexConverter<uint>((IReadOnlyBuffer<uint>)buffer, (ICanIndex<uint>)indexer);
+			if(typeCode == TypeCode.UInt64)
+				return new CategoricalIndexConverter<ulong>((IReadOnlyBuffer<ulong>)buffer, (ICanIndex<ulong>)indexer);
 			if(type == typeof(IndexList))
 				return new CategoricalIndexConverter<IndexList>((IReadOnlyBuffer<IndexList>)buffer, (ICanIndex<IndexList>)indexer);
 			if(type == typeof(WeightedIndexList))
@@ -1386,6 +1522,8 @@ namespace BrightData.Helper
         {
             var type = buffer.DataType;
 			var typeCode = Type.GetTypeCode(type);
+			if(typeCode == TypeCode.Byte)
+				return new NormalizationConverter<byte>((IReadOnlyBuffer<byte>)buffer, normalization);
 			if(typeCode == TypeCode.SByte)
 				return new NormalizationConverter<sbyte>((IReadOnlyBuffer<sbyte>)buffer, normalization);
 			if(typeCode == TypeCode.Single)
@@ -1400,6 +1538,12 @@ namespace BrightData.Helper
 				return new NormalizationConverter<int>((IReadOnlyBuffer<int>)buffer, normalization);
 			if(typeCode == TypeCode.Int64)
 				return new NormalizationConverter<long>((IReadOnlyBuffer<long>)buffer, normalization);
+			if(typeCode == TypeCode.UInt16)
+				return new NormalizationConverter<ushort>((IReadOnlyBuffer<ushort>)buffer, normalization);
+			if(typeCode == TypeCode.UInt32)
+				return new NormalizationConverter<uint>((IReadOnlyBuffer<uint>)buffer, normalization);
+			if(typeCode == TypeCode.UInt64)
+				return new NormalizationConverter<ulong>((IReadOnlyBuffer<ulong>)buffer, normalization);
 			throw new NotImplementedException($"Could not create NormalizationConverter for type {type}");
         }
 
@@ -1408,6 +1552,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new NumericVectoriser<bool>();
+			if(typeCode == TypeCode.Byte)
+				return new NumericVectoriser<byte>();
 			if(typeCode == TypeCode.SByte)
 				return new NumericVectoriser<sbyte>();
 			if(typeCode == TypeCode.Single)
@@ -1422,6 +1568,12 @@ namespace BrightData.Helper
 				return new NumericVectoriser<int>();
 			if(typeCode == TypeCode.Int64)
 				return new NumericVectoriser<long>();
+			if(typeCode == TypeCode.UInt16)
+				return new NumericVectoriser<ushort>();
+			if(typeCode == TypeCode.UInt32)
+				return new NumericVectoriser<uint>();
+			if(typeCode == TypeCode.UInt64)
+				return new NumericVectoriser<ulong>();
 			if(typeCode == TypeCode.String)
 				return new NumericVectoriser<string>();
 			throw new NotImplementedException($"Could not create NumericVectoriser for type {type}");
@@ -1432,6 +1584,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new CategoricalIndexVectoriser<bool>();
+			if(typeCode == TypeCode.Byte)
+				return new CategoricalIndexVectoriser<byte>();
 			if(typeCode == TypeCode.SByte)
 				return new CategoricalIndexVectoriser<sbyte>();
 			if(typeCode == TypeCode.Single)
@@ -1450,6 +1604,12 @@ namespace BrightData.Helper
 				return new CategoricalIndexVectoriser<long>();
 			if(typeCode == TypeCode.DateTime)
 				return new CategoricalIndexVectoriser<DateTime>();
+			if(typeCode == TypeCode.UInt16)
+				return new CategoricalIndexVectoriser<ushort>();
+			if(typeCode == TypeCode.UInt32)
+				return new CategoricalIndexVectoriser<uint>();
+			if(typeCode == TypeCode.UInt64)
+				return new CategoricalIndexVectoriser<ulong>();
 			if(type == typeof(IndexList))
 				return new CategoricalIndexVectoriser<IndexList>();
 			if(type == typeof(WeightedIndexList))
@@ -1478,6 +1638,8 @@ namespace BrightData.Helper
 			var typeCode = Type.GetTypeCode(type);
 			if(typeCode == TypeCode.Boolean)
 				return new OneHotVectoriser<bool>(maxSize);
+			if(typeCode == TypeCode.Byte)
+				return new OneHotVectoriser<byte>(maxSize);
 			if(typeCode == TypeCode.SByte)
 				return new OneHotVectoriser<sbyte>(maxSize);
 			if(typeCode == TypeCode.Single)
@@ -1496,6 +1658,12 @@ namespace BrightData.Helper
 				return new OneHotVectoriser<long>(maxSize);
 			if(typeCode == TypeCode.DateTime)
 				return new OneHotVectoriser<DateTime>(maxSize);
+			if(typeCode == TypeCode.UInt16)
+				return new OneHotVectoriser<ushort>(maxSize);
+			if(typeCode == TypeCode.UInt32)
+				return new OneHotVectoriser<uint>(maxSize);
+			if(typeCode == TypeCode.UInt64)
+				return new OneHotVectoriser<ulong>(maxSize);
 			if(type == typeof(IndexList))
 				return new OneHotVectoriser<IndexList>(maxSize);
 			if(type == typeof(WeightedIndexList))
@@ -1528,6 +1696,8 @@ namespace BrightData.Helper
             uint? maxDistinctItems = null
         ) {
 			var typeCode = Type.GetTypeCode(type);
+			if(typeCode == TypeCode.Byte)
+				return new UnmanagedCompositeBuffer<byte>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
 			if(typeCode == TypeCode.SByte)
 				return new UnmanagedCompositeBuffer<sbyte>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
 			if(typeCode == TypeCode.Single)
@@ -1542,6 +1712,12 @@ namespace BrightData.Helper
 				return new UnmanagedCompositeBuffer<int>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
 			if(typeCode == TypeCode.Int64)
 				return new UnmanagedCompositeBuffer<long>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
+			if(typeCode == TypeCode.UInt16)
+				return new UnmanagedCompositeBuffer<ushort>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
+			if(typeCode == TypeCode.UInt32)
+				return new UnmanagedCompositeBuffer<uint>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
+			if(typeCode == TypeCode.UInt64)
+				return new UnmanagedCompositeBuffer<ulong>(tempStreams, blockSize, maxBlockSize, maxInMemoryBlocks, maxDistinctItems);
 			throw new NotImplementedException($"Could not create UnmanagedCompositeBuffer for type {type}");
         }
     }

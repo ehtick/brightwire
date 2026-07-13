@@ -261,7 +261,7 @@ namespace BrightData.LinearAlgebra
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
-        public IVector<T> CreateVector(IEnumerable<T> values) => CreateVector(values.ToArray().AsSpan());
+        public IVector<T> CreateVector(IEnumerable<T> values) => CreateVector([.. values]);
 
         /// <summary>
         /// Creates a matrix from a segment

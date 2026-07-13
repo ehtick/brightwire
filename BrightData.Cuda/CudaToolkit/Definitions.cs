@@ -105,22 +105,19 @@ namespace BrightData.Cuda.CudaToolkit
         ErrorUnknown = 999,
     }
     
-/// <summary>
-/// Corresponds to cuBLAS <cublasStatus_t> enumeration.
-/// </summary>
-internal enum CuBlasStatus
-{
-    Success = 0,
-    NotInitialized = 1,
-    AllocFailed = 3,
-    InvalidValue = 7,
-    ArchMismatch = 8,
-    MappingError = 11,
-    ExecutionFailed = 13,
-    InternalError = 14,
-    NotSupported = 15,
-    LicenseError = 16
-}
+    internal enum CuBlasStatus
+    {
+        Success = 0,
+        NotInitialized = 1,
+        AllocFailed = 3,
+        InvalidValue = 7,
+        ArchMismatch = 8,
+        MappingError = 11,
+        ExecutionFailed = 13,
+        InternalError = 14,
+        NotSupported = 15,
+        LicenseError = 16
+    }
     [Flags]
     public enum CuMemAllocationHandleType
     {
@@ -571,23 +568,17 @@ internal enum CuBlasStatus
         Default = 0,
         DisableCachingOverride = 1
     }
-/// <summary>
-/// Corresponds to cuBLAS <cublasOperation_t> enumeration.
-/// </summary>
-internal enum Operation
-{
-        NonTranspose = 0,
-        Transpose = 1,
-        ConjugateTransposeHermitian = 2
-}
+    internal enum Operation
+    {
+            NonTranspose = 0,
+            Transpose = 1,
+            ConjugateTransposeHermitian = 2
+    }
     [StructLayout(LayoutKind.Sequential)]
     public struct CudaBlasHandle
     {
         public nint Pointer;
     }
-    /// <summary>
-    /// Corresponds to cuBLAS <cublasComputeType_t> enumeration.
-    /// </summary>
     internal enum CudaDataType
     {
         CudaR16F = 2,
@@ -619,131 +610,107 @@ internal enum Operation
         CudaR64U = 26,
         CudaC64U = 27
     }
-/// <summary>
-/// Corresponds to cuBLAS <cublasFillMode_t> enumeration.
-/// </summary>
-internal enum FillMode
-{
-        Lower = 0,
-        Upper = 1,
-        Full = 2
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasDiagType_t> enumeration.
-/// </summary>
-internal enum DiagType
-{
-        NonUnit = 0,
-        Unit = 1
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasSideMode_t> enumeration.
-/// </summary>
-internal enum SideMode
-{
-        Left = 0,
-        Right = 1
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasPointerMode_t> enumeration.
-/// </summary>
-internal enum PointerMode
-{
-        Host = 0,
-        Device = 1
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasAtomicsMode_t> enumeration.
-/// </summary>
-internal enum AtomicsMode
-{
-        NotAllowed = 0,
-        Allowed = 1
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasGemmAlgo_t> enumeration.
-/// </summary>
-internal enum GemmAlgo
-{
-        Default = -1,
-        Algo0 = 0,
-        Algo1 = 1,
-        Algo2 = 2,
-        Algo3 = 3,
-        Algo4 = 4,
-        Algo5 = 5,
-        Algo6 = 6,
-        Algo7 = 7,
-        Algo8 = 8,
-        Algo9 = 9,
-        Algo10 = 10,
-        Algo11 = 11,
-        Algo12 = 12,
-        Algo13 = 13,
-        Algo14 = 14,
-        Algo15 = 15,
-        Algo16 = 16,
-        Algo17 = 17,
-        Algo18 = 18,
-        Algo19 = 19,
-        Algo20 = 20,
-        Algo21 = 21,
-        Algo22 = 22,
-        Algo23 = 23,
-        DefaultTensorOp = 99,
-        Autotune = 1000,
-        Algo0TensorOp = 100,
-        Algo1TensorOp = 101,
-        Algo2TensorOp = 102,
-        Algo3TensorOp = 103,
-        Algo4TensorOp = 104,
-        Algo5TensorOp = 105,
-        Algo6TensorOp = 106,
-        Algo7TensorOp = 107,
-        Algo8TensorOp = 108,
-        Algo9TensorOp = 109,
-        Algo10TensorOp = 110,
-        Algo11TensorOp = 111,
-        Algo12TensorOp = 112,
-        Algo13TensorOp = 113,
-        Algo14TensorOp = 114,
-        Algo15TensorOp = 115
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasMath_t> enumeration.
-/// </summary>
-internal enum CuBlasMathMode
-{
-        DefaultMath = 0,
-        [Obsolete("deprecated, same effect as using CUBLAS_COMPUTE_32F_FAST_16F, will be removed in a future release")] 
-        TensorOpMath = 1,
-        PedanticMath = 2,
-        Tf32TensorOpMath = 3,
-        /* allow accelerating single precision routines using the BF16x9 algorithm */
-        EMULATEDBF16X9MATH = 4,
-        /* allow accelerating double precision routines using fixed-point emulation */
-        FP64EMULATEDFIXEDPOINTMATH = 8,
-        DisallowReducedPrecisionReduction = 16
-}
-/// <summary>
-/// Corresponds to cuBLAS <cublasComputeType_t> enumeration.
-/// </summary>
-internal enum ComputeType
-{
-        Compute16F = 64,
-        Compute16FPedantic = 65,
-        Compute32F = 68,
-        Compute32FPedantic = 69,
-        Compute64F = 70,
-        Compute64FPedantic = 71,
-        Compute32I = 72,
-        Compute32IPedantic = 73,
-        Compute32FFast16F = 74,
-        Compute32FFast16Bf = 75,
-        Compute32FEmulated16BfX9 = 76,
-        Compute32FFastTf32 = 77,
-        Compute64FEmulatedFixedPoint = 78,
-}
+    internal enum FillMode
+    {
+            Lower = 0,
+            Upper = 1,
+            Full = 2
+    }
+    internal enum DiagType
+    {
+            NonUnit = 0,
+            Unit = 1
+    }
+    internal enum SideMode
+    {
+            Left = 0,
+            Right = 1
+    }
+    internal enum PointerMode
+    {
+            Host = 0,
+            Device = 1
+    }
+    internal enum AtomicsMode
+    {
+            NotAllowed = 0,
+            Allowed = 1
+    }
+    internal enum GemmAlgo
+    {
+            Default = -1,
+            Algo0 = 0,
+            Algo1 = 1,
+            Algo2 = 2,
+            Algo3 = 3,
+            Algo4 = 4,
+            Algo5 = 5,
+            Algo6 = 6,
+            Algo7 = 7,
+            Algo8 = 8,
+            Algo9 = 9,
+            Algo10 = 10,
+            Algo11 = 11,
+            Algo12 = 12,
+            Algo13 = 13,
+            Algo14 = 14,
+            Algo15 = 15,
+            Algo16 = 16,
+            Algo17 = 17,
+            Algo18 = 18,
+            Algo19 = 19,
+            Algo20 = 20,
+            Algo21 = 21,
+            Algo22 = 22,
+            Algo23 = 23,
+            DefaultTensorOp = 99,
+            Autotune = 1000,
+            Algo0TensorOp = 100,
+            Algo1TensorOp = 101,
+            Algo2TensorOp = 102,
+            Algo3TensorOp = 103,
+            Algo4TensorOp = 104,
+            Algo5TensorOp = 105,
+            Algo6TensorOp = 106,
+            Algo7TensorOp = 107,
+            Algo8TensorOp = 108,
+            Algo9TensorOp = 109,
+            Algo10TensorOp = 110,
+            Algo11TensorOp = 111,
+            Algo12TensorOp = 112,
+            Algo13TensorOp = 113,
+            Algo14TensorOp = 114,
+            Algo15TensorOp = 115
+    }
+    internal enum CuBlasMathMode
+    {
+            DefaultMath = 0,
+            [Obsolete("deprecated, same effect as using CUBLAS_COMPUTE_32F_FAST_16F, will be removed in a future release")] 
+            TensorOpMath = 1,
+            PedanticMath = 2,
+            Tf32TensorOpMath = 3,
+            /* allow accelerating single precision routines using the BF16x9 algorithm */
+            EMULATEDBF16X9MATH = 4,
+            /* allow accelerating double precision routines using fixed-point emulation */
+            FP64EMULATEDFIXEDPOINTMATH = 8,
+            DisallowReducedPrecisionReduction = 16
+    }
+    internal enum ComputeType
+    {
+            Compute16F = 64,
+            Compute16FPedantic = 65,
+            Compute32F = 68,
+            Compute32FPedantic = 69,
+            Compute64F = 70,
+            Compute64FPedantic = 71,
+            Compute32I = 72,
+            Compute32IPedantic = 73,
+            Compute32FFast16F = 74,
+            Compute32FFast16Bf = 75,
+            Compute32FEmulated16BfX9 = 76,
+            Compute32FFastTf32 = 77,
+            Compute64FEmulatedFixedPoint = 78,
+    }
 
     internal delegate void CublasLogCallback([MarshalAs(UnmanagedType.LPStr)] string msg);
     [StructLayout(LayoutKind.Sequential)]

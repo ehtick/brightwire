@@ -26,7 +26,7 @@ namespace ExampleCode.DataTableTrainers
             var builder = context.CreateTableBuilder();
             builder.CreateColumn(BrightDataType.IndexList, "Sentences");
             foreach(var sentence in sentences)
-                builder.AddRow(IndexList.Create(sentence.Select(GetStringIndex).ToArray()));
+                builder.AddRow(IndexList.Create([.. sentence.Select(GetStringIndex)]));
             _sentenceTable = builder.BuildInMemory().Result;
         }
 

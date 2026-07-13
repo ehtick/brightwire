@@ -13,9 +13,9 @@ using BrightData.Buffer.Operations;
 using System.Collections.Generic;
 using BrightData.Buffer.Operations.Conversion;
 using BrightData.Converter;
-using BrightData.DataTable.ConstraintValidation;
 using BrightData.Buffer.Vectorisation;
 using BrightData.Buffer.Composite;
+using BrightData.DataTable.Meta;
 
 namespace BrightData.Helper
 {
@@ -162,7 +162,7 @@ namespace BrightData.Helper
     {
         get {
             yield return ("Boolean", "bool");
-            //yield return ("Byte", "byte");
+            yield return ("Byte", "byte");
             //yield return ("Char", "char");
             yield return ("SByte", "sbyte");
             yield return ("Single", "float");
@@ -173,9 +173,9 @@ namespace BrightData.Helper
             yield return ("Int32", "int");
             yield return ("Int64", "long");
             yield return ("DateTime", "DateTime");
-            //yield return ("UInt16", "ushort");
-            //yield return ("UInt32", "uint");
-            //yield return ("UInt64", "ulong");
+            yield return ("UInt16", "ushort");
+            yield return ("UInt32", "uint");
+            yield return ("UInt64", "ulong");
         }
     }
     IEnumerable<string> ValidTypes
@@ -214,6 +214,7 @@ namespace BrightData.Helper
     {
         get {
             yield return ("Boolean", "bool");
+            yield return ("Byte", "byte");
             yield return ("SByte", "sbyte");
             yield return ("Single", "float");
             yield return ("Double", "double");
@@ -221,12 +222,16 @@ namespace BrightData.Helper
             yield return ("Int16", "short");
             yield return ("Int32", "int");
             yield return ("Int64", "long");
+            yield return ("UInt16", "ushort");
+            yield return ("UInt32", "uint");
+            yield return ("UInt64", "ulong");
             yield return ("String", "string");
         }
     }
     IEnumerable<(string TypeCode, string TypeName)> ValidNumericTypeCodes
     {
         get {
+            yield return ("Byte", "byte");
             yield return ("SByte", "sbyte");
             yield return ("Single", "float");
             yield return ("Double", "double");
@@ -234,6 +239,9 @@ namespace BrightData.Helper
             yield return ("Int16", "short");
             yield return ("Int32", "int");
             yield return ("Int64", "long");
+            yield return ("UInt16", "ushort");
+            yield return ("UInt32", "uint");
+            yield return ("UInt64", "ulong");
         }
     }
 

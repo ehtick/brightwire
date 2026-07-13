@@ -537,7 +537,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a + b,
+            (in a, in b, out r) => r = a + b,
             (a, b) => a + b
         );
 
@@ -559,7 +559,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a * coefficient1 + b * coefficient2,
+            (in a, in b, out r) => r = a * coefficient1 + b * coefficient2,
             (a, b) => a * coefficient1 + b * coefficient2
         );
 
@@ -597,7 +597,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a + b,
+            (in a, in b, out r) => r = a + b,
             (a, b) => a + b
         );
 
@@ -618,7 +618,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = (a * coefficient1) + (b * coefficient2),
+            (in a, in b, out r) => r = (a * coefficient1) + (b * coefficient2),
             (a, b) => (a * coefficient1) + (b * coefficient2)
         );
 
@@ -697,7 +697,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a - b,
+            (in a, in b, out r) => r = a - b,
             (a, b) => a - b
         );
 
@@ -719,7 +719,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a * coefficient1 - b * coefficient2,
+            (in a, in b, out r) => r = a * coefficient1 - b * coefficient2,
             (a, b) => a * coefficient1 - b * coefficient2
         );
 
@@ -736,7 +736,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a - b,
+            (in a, in b, out r) => r = a - b,
             (a, b) => a - b
         );
 
@@ -757,7 +757,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a * coefficient1 - b * coefficient2,
+            (in a, in b, out r) => r = a * coefficient1 - b * coefficient2,
             (a, b) => a * coefficient1 - b * coefficient2
         );
 
@@ -795,7 +795,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a * b,
+            (in a, in b, out r) => r = a * b,
             (a, b) => a * b
         );
 
@@ -812,7 +812,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a * b,
+            (in a, in b, out r) => r = a * b,
             (a, b) => a * b
         );
 
@@ -830,7 +830,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => ZipVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a / b,
+            (in a, in b, out r) => r = a / b,
             (a, b) => a / b
         );
 
@@ -847,7 +847,7 @@ namespace BrightData
         ) where T : unmanaged, INumber<T> => MutateVectorized(
             span,
             other,
-            (in Vector<T> a, in Vector<T> b, out Vector<T> r) => r = a / b,
+            (in a, in b, out r) => r = a / b,
             (a, b) => a / b
         );
 

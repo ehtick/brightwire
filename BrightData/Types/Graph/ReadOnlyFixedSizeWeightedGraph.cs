@@ -17,21 +17,16 @@ namespace BrightData.Types.Graph
     /// <typeparam name="W"></typeparam>
     /// <typeparam name="AT"></typeparam>
     /// <typeparam name="T"></typeparam>
-    public readonly struct ReadOnlyFixedSizeWeightedGraph<T, W, AT> : IReadOnlyWeightedGraph<T, W>, IEquatable<ReadOnlyFixedSizeWeightedGraph<T, W, AT>>
+    /// <remarks>
+    /// Creates a graph from an array of nodes.
+    /// </remarks>
+    /// <param name="nodes"></param>
+    public readonly struct ReadOnlyFixedSizeWeightedGraph<T, W, AT>(FixedSizeWeightedGraphNode<T, W, AT>[] nodes) : IReadOnlyWeightedGraph<T, W>, IEquatable<ReadOnlyFixedSizeWeightedGraph<T, W, AT>>
         where T : unmanaged, IEquatable<T>, IHaveSingleIndex
         where W : unmanaged, IBinaryFloatingPointIeee754<W>, IMinMaxValue<W>
         where AT : unmanaged, IFixedSizeSortedArray<uint, W>
     {
-        readonly FixedSizeWeightedGraphNode<T, W, AT>[] _nodes;
-
-        /// <summary>
-        /// Creates a graph from an array of nodes.
-        /// </summary>
-        /// <param name="nodes"></param>
-        public ReadOnlyFixedSizeWeightedGraph(FixedSizeWeightedGraphNode<T, W, AT>[] nodes)
-        {
-            _nodes = nodes;
-        }
+        readonly FixedSizeWeightedGraphNode<T, W, AT>[] _nodes = nodes;
 
         /// <summary>
         /// Number of nodes in the graph.

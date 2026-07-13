@@ -151,7 +151,7 @@ namespace ExampleCode.DataSet
                     images[i] = reader.ReadBytes((int)imageSize);
             }
 
-            return labels.Zip(images, (l, d) => new Image(d, l)).ToArray();
+            return [.. labels.Zip(images, (l, d) => new Image(d, l))];
         }
 
         public async Task<IDataTable> BuildVectorToVectorDataTable(BrightDataContext brightContext, Image[] images)

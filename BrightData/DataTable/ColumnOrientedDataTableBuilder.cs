@@ -131,7 +131,7 @@ namespace BrightData.DataTable
         public ICompositeBuffer<ReadOnlyVector<float>> CreateFixedSizeVectorColumn(uint size, string? name)
         {
             var ret = CreateColumn<ReadOnlyVector<float>>(name);
-            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyVector<float>>((in ReadOnlyVector<float> tensor) => tensor.Size == size);
+            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyVector<float>>((in tensor) => tensor.Size == size);
             return ret;
         }
 
@@ -139,7 +139,7 @@ namespace BrightData.DataTable
         public ICompositeBuffer<ReadOnlyMatrix<float>> CreateFixedSizeMatrixColumn(uint rows, uint columns, string? name)
         {
             var ret = CreateColumn<ReadOnlyMatrix<float>>(name);
-            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyMatrix<float>>((in ReadOnlyMatrix<float> tensor) => 
+            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyMatrix<float>>((in tensor) => 
                 tensor.RowCount == rows 
                 && tensor.ColumnCount == columns 
             );
@@ -149,7 +149,7 @@ namespace BrightData.DataTable
         public ICompositeBuffer<ReadOnlyTensor3D<float>> CreateFixedSize3DTensorColumn(uint depth, uint rows, uint columns, string? name)
         {
             var ret = CreateColumn<ReadOnlyTensor3D<float>>(name);
-            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyTensor3D<float>>((in ReadOnlyTensor3D<float> tensor) => 
+            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyTensor3D<float>>((in tensor) => 
                 tensor.RowCount == rows 
                 && tensor.ColumnCount == columns 
                 && tensor.Depth == depth
@@ -160,7 +160,7 @@ namespace BrightData.DataTable
         public ICompositeBuffer<ReadOnlyTensor4D<float>> CreateFixedSize4DTensorColumn(uint count, uint depth, uint rows, uint columns, string? name)
         {
             var ret = CreateColumn<ReadOnlyTensor4D<float>>(name);
-            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyTensor4D<float>>((in ReadOnlyTensor4D<float> tensor) => 
+            ret.ConstraintValidator = new ThrowOnInvalidConstraint<ReadOnlyTensor4D<float>>((in tensor) => 
                 tensor.RowCount == rows 
                 && tensor.ColumnCount == columns 
                 && tensor.Depth == depth 

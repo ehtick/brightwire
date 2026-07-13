@@ -6,19 +6,15 @@ namespace BrightWire.TrainingData.Helper
     /// <summary>
     /// Binary reader for big endian streams
     /// </summary>
-    public class BigEndianBinaryReader : BinaryReader
+    /// <remarks>
+    /// Creates a new big endian binary reader
+    /// </remarks>
+    /// <param name="stream"></param>
+    public class BigEndianBinaryReader(Stream stream) : BinaryReader(stream)
     {
         byte[]? _a16;
         byte[]? _a32;
         byte[]? _a64;
-
-        /// <summary>
-        /// Creates a new big endian binary reader
-        /// </summary>
-        /// <param name="stream"></param>
-        public BigEndianBinaryReader(Stream stream) : base(stream)
-        {
-        }
 
         /// <summary>
         /// Reads an int

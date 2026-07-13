@@ -57,10 +57,9 @@ namespace BrightData.LinearAlgebra.Clustering
                     .Select((r, i) => (Index: i, r.GetMinAndMaxValues().MaxIndex))
                     .ToList();
                 
-                return documentClusters
+                return [.. documentClusters
                     .GroupBy(d => d.MaxIndex)
-                    .Select(g => g.Select(d => (uint)d.Index).ToArray())
-                    .ToArray()
+                    .Select(g => g.Select(d => (uint)d.Index).ToArray())]
                 ;
             }
             finally {
