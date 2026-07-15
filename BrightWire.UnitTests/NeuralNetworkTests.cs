@@ -29,7 +29,7 @@ namespace BrightWire.UnitTests
                 learningRate: 0.3f, 
                 batchSize: 1, 
                 hiddenLayerSize: 2, 
-                numIterations: 100, 
+                numIterations: 120, 
                 activation: x => x.SigmoidActivation(), 
                 gradientDescent: x => x.Adam, 
                 weightInitialisation: x => x.Gaussian

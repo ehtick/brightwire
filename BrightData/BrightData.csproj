@@ -11,7 +11,7 @@
     <Company />
     <Product>Bright ML</Product>
     <Description>Bright data is a performance oriented data table and linear algebra library that supports both CPU and GPU computation</Description>
-    <Copyright>Copyright © Jack Dermody 2016-2024</Copyright>
+    <Copyright>Copyright © Jack Dermody 2016-2026</Copyright>
     <PackageIcon>bw_favicon.png</PackageIcon>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

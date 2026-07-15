@@ -316,7 +316,7 @@ namespace BrightData
         }
 
         /// <summary>
-        /// Reacts a float array from a binary reader
+        /// Reads a float array from a binary reader
         /// </summary>
         /// <param name="context"></param>
         /// <param name="reader"></param>

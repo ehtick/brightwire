@@ -201,7 +201,7 @@ namespace BrightData
                     var index = item.Index;
                     var tf = item.Weight / totalWords;
                     var docsWithTerm = (float)indexOccurrence[index];
-                    var idf = MathF.Log(numDocs / (docsWithTerm + 1f)) + 1f;
+                    var idf = MathF.Log(1f + numDocs / (docsWithTerm + 1f));
                     var score = tf * idf;
                     classificationIndex.Add(new WeightedIndexList.Item(index, score));
                 }
@@ -233,10 +233,10 @@ namespace BrightData
                     var classificationIndex = new List<WeightedIndexList.Item>();
                     foreach (ref readonly var item in weightedIndexList.ReadOnlySpan) {
                         var index = item.Index;
-                        var tf = (item.Weight * (k + 1)) / ((item.Weight + k) * (1 - b + (b * documentWeight))) + d;
+                        var tf = (item.Weight * (k + 1)) / ((item.Weight + k) * (1 - b + (b * documentWeight)));
                         var docsWithTerm = (float)indexOccurrence[index];
-                        var idf = MathF.Log((numDocs - docsWithTerm + 0.5f) / (0.5f + docsWithTerm) + 1);
-                        var score = tf * idf;
+                        var idf = MathF.Max(0f, MathF.Log((numDocs - docsWithTerm + 0.5f) / (0.5f + docsWithTerm)));
+                        var score = tf * idf + d;
                         classificationIndex.Add(new WeightedIndexList.Item(index, score));
                     }
 

@@ -84,6 +84,13 @@ namespace BrightData
         void ForEach(ReadOnlySpan<uint> indices, IndexedSpanCallbackWithVectorIndexAndRelativeIndex<T> callback);
 
         /// <summary>
+        /// Returns a single vector as ReadOnlyMemory (no allocation for in-memory storage)
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        ReadOnlyMemory<T> Get(uint index);
+
+        /// <summary>
         /// Returns all vectors
         /// </summary>
         /// <returns></returns>

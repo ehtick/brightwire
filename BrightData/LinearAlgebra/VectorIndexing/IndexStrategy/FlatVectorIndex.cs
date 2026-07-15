@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using CommunityToolkit.HighPerformance;
@@ -18,21 +17,37 @@ namespace BrightData.LinearAlgebra.VectorIndexing.IndexStrategy
             Storage.Dispose();
         }
 
-        public unsafe IEnumerable<uint> Rank(ReadOnlySpan<T> vector)
+        public IEnumerable<uint> Rank(ReadOnlySpan<T> vector)
         {
-            var results = new T[Storage.Size];
-            fixed (T* ptr = vector) {
-                var tempPtr = ptr;
-                var len = vector.Length;
-                Storage.ForEach((x, i) => results[i] = x.FindDistance(new ReadOnlySpan<T>(tempPtr, len), distanceMetric));
-            }
+            // ReadOnlySpan<T> is a ref struct and cannot be used in a yield-return method.
+            // Compute results eagerly and return the array directly.
+            return ComputeRankedIndices(vector);
+        }
 
-            return results
-                .Select((x, i) => (Distance: x, Index: (uint)i))
-                .Where(x => !T.IsNaN(x.Distance))
-                .OrderBy(x => x.Distance)
-                .Select(x => x.Index)
-            ;
+        // Compute distances, sort by distance, and return sorted indices (skipping NaN).
+        uint[] ComputeRankedIndices(ReadOnlySpan<T> vector)
+        {
+            var size = Storage.Size;
+            var distances = new T[size];
+            var indices = new uint[size];
+
+            // Copy to array so it can be captured by the lambda callback.
+            var vectorArray = vector.ToArray();
+
+            for (var i = 0U; i < size; i++)
+                indices[i] = i;
+
+            Storage.ForEach((x, i) => distances[i] = x.FindDistance(vectorArray, distanceMetric));
+            Array.Sort(distances, indices, 0, (int)size);
+
+            // Filter out NaN distances and compact into result array.
+            var result = new List<uint>((int)size);
+            for (var i = 0U; i < size; i++)
+            {
+                if (!T.IsNaN(distances[i]))
+                    result.Add(indices[i]);
+            }
+            return result.ToArray();
         }
 
         public uint[] Closest(ReadOnlyMemory<T>[] vector)

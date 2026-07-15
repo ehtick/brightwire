@@ -14,7 +14,7 @@ namespace BrightData
         public static readonly int NumericsVectorSize = Vector<float>.Count;
 
         /// <summary>
-        /// Vectorized cosine distance (0 for perpendicular, 1 for orthogonal, 2 for opposite)
+        /// Vectorized cosine distance (0 for orthogonal, 1 for identical (same direction), 2 for opposite)
         /// </summary>
         /// <param name="v1">First vector</param>
         /// <param name="v2">Second vector</param>
@@ -51,14 +51,14 @@ namespace BrightData
         public static (float Value, uint Index) Maximum(this float[] vector) => new ReadOnlySpan<float>(vector, 0, vector.Length).Maximum();
 
         /// <summary>
-        /// Returns the maximum value within a vector
+        /// Returns the maximum index within a vector
         /// </summary>
         /// <param name="vector">Vector to analyse</param>
         /// <returns></returns>
         public static uint MaximumIndex(this float[] vector) => Maximum(vector).Index;
 
         /// <summary>
-        /// Returns the index of the maximum value within a vector
+        /// Returns the maximum value within a vector
         /// </summary>
         /// <param name="vector">Vector to analyse</param>
         /// <returns></returns>

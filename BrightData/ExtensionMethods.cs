@@ -52,7 +52,7 @@ namespace BrightData
                 TypeCode.UInt16   => typeof(ushort),
                 TypeCode.UInt32   => typeof(uint),
                 TypeCode.UInt64   => typeof(ulong),
-                _                 => throw new NotImplementedException()
+                _                 => throw new ArgumentOutOfRangeException(nameof(code))
             };
         }
 
@@ -93,7 +93,7 @@ namespace BrightData
         }
 
         /// <summary>
-        /// Checks if one type can be implicitly cast to another
+        /// Checks if one type can be cast to another
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
@@ -119,13 +119,19 @@ namespace BrightData
         /// <param name="rnd">Random number generator to use</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> seq, Random rnd)
+        public static T[] Shuffle<T>(this IEnumerable<T> seq, Random rnd)
         {
-            return seq.OrderBy(_ => rnd.Next());
+            //return seq.OrderBy(_ => rnd.Next());
+            var arr = seq.ToArray();
+            for (var i = arr.Length - 1; i > 0; i--) {
+                var j = rnd.Next(0, i + 1);
+                (arr[i], arr[j]) = (arr[j], arr[i]);
+            }
+            return arr;
         }
 
         /// <summary>
-        /// Randomly splits the sequence into two arrays (either "training" or "test")
+        /// Splits the sequence into two arrays (either "training" or "test")
         /// </summary>
         /// <param name="seq"></param>
         /// <param name="trainPercentage">Percentage of items to add to the training array</param>
@@ -309,7 +315,7 @@ namespace BrightData
         /// <returns></returns>
         public static MetaData SetIsOneHot(this MetaData metaData, bool isOneHotEncoded)
         {
-            metaData.Set(Consts.IsCategorical, isOneHotEncoded);
+            metaData.Set(Consts.IsOneHot, isOneHotEncoded);
             return metaData;
         }
 
@@ -462,14 +468,9 @@ namespace BrightData
         /// <returns></returns>
         public static IEnumerable<(T First, T Second)> FindAllPairs<T>(this T[] items)
         {
-            var len = items.Length;
-            var state = new HashSet<(int, int)>();
-
-            for (var i = 0; i < len; i++) {
-                for (var j = 0; j < len; j++) {
-                    if (i != j && state.Add((i, j)) && state.Add((j, i)))
-                        yield return (items[i], items[j]);
-                }
+            for (int i = 0, len = items.Length; i < len; i++) {
+                for (var j = i + 1; j < len; j++)
+                    yield return (items[i], items[j]);
             }
         }
 
@@ -482,7 +483,7 @@ namespace BrightData
         /// <param name="tempBufferSize">Size of temp buffer to use</param>
         /// <returns></returns>
         public static IEnumerable<T> Enumerate<T>(this Stream stream, uint count, int tempBufferSize = 8192)
-            where T : struct
+            where T : unmanaged
         {
             if (count < tempBufferSize) {
                 // simple case
@@ -492,19 +493,17 @@ namespace BrightData
             }
             else {
                 // buffered read
-                var sizeofT = Unsafe.SizeOf<T>();
                 var temp = ArrayPool<T>.Shared.Rent(tempBufferSize);
                 try {
                     var totalRead = 0;
                     while (totalRead < count) {
                         var remaining = count - totalRead;
-                        var ptr = remaining >= tempBufferSize
-                            ? temp
-                            : ((Span<T>)temp)[..(int)remaining];
-                        var readCount = stream.Read(MemoryMarshal.Cast<T, byte>(ptr)) / sizeofT;
-                        for (var i = 0; i < readCount; i++)
+                        var actualBufferSize = Math.Min(temp.Length, (int)remaining);
+                        var ptr = temp.AsSpan()[..actualBufferSize];
+                        stream.ReadExactly(MemoryMarshal.AsBytes(ptr));
+                        for (var i = 0; i < actualBufferSize; i++)
                             yield return temp[i];
-                        totalRead += readCount;
+                        totalRead += actualBufferSize;
                     }
                 }
                 finally {
@@ -655,7 +654,7 @@ namespace BrightData
             if (DateTime.TryParseExact(str, "yyyyMMdd", formatInfo, styles, out ret))
                 return ret;
 
-            throw new ArgumentException($"{str} was not recognised as a valid date");
+            throw new FormatException($"{str} was not recognised as a valid date");
         }
 
         /// <summary>

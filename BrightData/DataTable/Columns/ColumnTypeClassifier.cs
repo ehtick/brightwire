@@ -13,9 +13,13 @@ namespace BrightData.DataTable.Columns
             BrightDataType.Decimal,
             BrightDataType.Float,
             BrightDataType.Int,
+            BrightDataType.UInt,
             BrightDataType.Short,
+            BrightDataType.UShort,
             BrightDataType.Long,
-            BrightDataType.SByte
+            BrightDataType.ULong,
+            BrightDataType.SByte,
+            BrightDataType.Byte
         ];
         static readonly HashSet<BrightDataType> ContinuousType = [
             .. NumericType,

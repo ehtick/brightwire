@@ -115,10 +115,12 @@ namespace BrightData.LinearAlgebra.VectorIndexing
         /// <param name="storageType">Storage type</param>
         /// <param name="vectorSize">Size of each input vector</param>
         /// <param name="capacity">The expected number of vectors (optional)</param>
+        /// <param name="filePath">File path for disk-based storage (required when storageType is OnDisk)</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException"></exception>
-        public static IStoreVectors<T> GetStorage(VectorStorageType storageType, uint vectorSize, uint? capacity) => storageType switch {
+        public static IStoreVectors<T> GetStorage(VectorStorageType storageType, uint vectorSize, uint? capacity, string? filePath = null) => storageType switch {
             VectorStorageType.InMemory => new InMemoryVectorStorage<T>(vectorSize, capacity),
+            VectorStorageType.OnDisk => new DiskBasedVectorStorage<T>(filePath ?? throw new ArgumentNullException(nameof(filePath)), vectorSize),
             _ => throw new NotSupportedException()
         };
 

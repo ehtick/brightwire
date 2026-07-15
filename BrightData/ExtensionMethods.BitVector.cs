@@ -119,42 +119,42 @@ namespace BrightData
         }
 
         /// <summary>
-        /// 
+        /// Returns a new vector containing the bits that are set in this vector but not in the other vector (set difference).
         /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="vector">The source bit vector.</param>
+        /// <param name="other">The bit vector to subtract.</param>
+        /// <returns>A new vector representing the set difference.</returns>
         public static BitVector Except<T>(this T vector, T other) where T : IBitVector, allows ref struct => Except(vector, other.AsSpan());
 
         /// <summary>
-        /// 
+        /// Returns a new vector containing the bits that are set in this vector but not in the other vector (set difference).
         /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="vector">The source bit vector.</param>
+        /// <param name="other">The span of values representing the bits to subtract.</param>
+        /// <returns>A new vector representing the set difference.</returns>
         public static BitVector Except<T>(this T vector, ReadOnlySpan<ulong> other) where T : IBitVector, allows ref struct
         {
             var ret = Clone(vector);
             Xor(ret.Data.Span, other);
-            And<ulong>(ret.Data.Span, other);
+            And(ret.Data.Span, vector.AsSpan());
             return ret;
         }
 
         /// <summary>
-        /// 
+        /// Computes the Hamming distance between this vector and another vector (the number of bits that differ).
         /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="vector">The source bit vector.</param>
+        /// <param name="other">The other bit vector to compare against.</param>
+        /// <returns>The number of differing bits.</returns>
         public static uint HammingDistance<T>(this T vector, BitVector other) where T : IBitVector, allows ref struct => HammingDistance(vector, other.AsSpan());
 
         /// <summary>
-        /// 
+        /// Computes the Hamming distance between this vector and another span of values (the number of bits that differ).
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="vector"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The bit vector type.</typeparam>
+        /// <param name="vector">The source bit vector.</param>
+        /// <param name="other">The span of values to compare against.</param>
+        /// <returns>The number of differing bits.</returns>
         public static uint HammingDistance<T>(this T vector, ReadOnlySpan<ulong> other) where T : IBitVector, allows ref struct
         {
             var copy = Clone(vector);

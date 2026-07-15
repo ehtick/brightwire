@@ -8,7 +8,7 @@
 
 
 Bright Wire - http://www.jackdermody.net/brightwire
-Copyright (c) 2016-2018 Jack Dermody - Open Source MIT License
+Copyright (c) 2016-2026 Jack Dermody - Open Source MIT License
 
 To compile the cuda kernels you will need to have installed the CUDA toolkit for a supported
 version of visual studio. https://developer.nvidia.com/cuda-toolkit

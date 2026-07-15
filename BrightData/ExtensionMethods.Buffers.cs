@@ -118,40 +118,46 @@ namespace BrightData
         /// <returns></returns>
         public static async Task<Dictionary<string /* group */, List<uint> /* row indices in group */>> GetGroups(this IReadOnlyBuffer[] buffers)
         {
-            // ReSharper disable once NotDisposedResourceIsReturned
             var enumerators = buffers.Select(x => x.EnumerateAll().GetAsyncEnumerator()).ToArray();
             var shouldContinue = true;
             var sb = new StringBuilder();
             var ret = new Dictionary<string, List<uint>>();
             uint rowIndex = 0;
 
-            while (shouldContinue) {
-                sb.Clear();
-                foreach (var enumerator in enumerators) {
-                    if (!await enumerator.MoveNextAsync()) {
-                        shouldContinue = false; 
-                        break;
+            try {
+                while (shouldContinue) {
+                    sb.Clear();
+                    foreach (var enumerator in enumerators) {
+                        if (!await enumerator.MoveNextAsync()) {
+                            shouldContinue = false; 
+                            break;
+                        }
+                        if (sb.Length > 0)
+                            sb.Append('|');
+                        sb.Append(enumerator.Current);
                     }
-                    if (sb.Length > 0)
-                        sb.Append('|');
-                    sb.Append(enumerator.Current);
-                }
 
-                if (shouldContinue) {
-                    var str = sb.ToString();
-                    if (!ret.TryGetValue(str, out var list))
-                        ret.Add(str, list = []);
-                    list.Add(rowIndex++);
+                    if (shouldContinue) {
+                        var str = sb.ToString();
+                        if (!ret.TryGetValue(str, out var list))
+                            ret.Add(str, list = []);
+                        list.Add(rowIndex++);
+                    }
                 }
+            }finally {
+                foreach (var enumerator in enumerators)
+                    await enumerator.DisposeAsync();
             }
-
-            foreach (var enumerator in enumerators)
-                await enumerator.DisposeAsync();
 
             return ret;
         }
 
-        class MemorySegment<T> : ReadOnlySequenceSegment<T>
+        /// <summary>
+        /// Represents a single memory segment within a <see cref="ReadOnlySequence{T}"/> chain.
+        /// Each segment wraps a <see cref="ReadOnlyMemory{T}"/> and links to the next segment in the sequence.
+        /// </summary>
+        /// <typeparam name="T">The element type stored in the segment.</typeparam>
+        private class MemorySegment<T> : ReadOnlySequenceSegment<T>
         {
             public MemorySegment(ReadOnlyMemory<T> memory) => Memory = memory;
             public MemorySegment<T> Append(ReadOnlyMemory<T> memory)
@@ -184,11 +190,12 @@ namespace BrightData
         }
 
         /// <summary>
-        /// 
+        /// Creates a <see cref="SequenceReader{T}"/> from a <see cref="ReadOnlySequence{T}"/>,
+        /// enabling sequential parsing and reading over the sequence data.
         /// </summary>
-        /// <param name="sequence"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The element type, which must be unmanaged and implement <see cref="IEquatable{T}"/>.</typeparam>
+        /// <param name="sequence">The read-only sequence to wrap with a sequence reader.</param>
+        /// <returns>A <see cref="SequenceReader{T}"/> positioned at the start of the sequence.</returns>
         public static SequenceReader<T> AsSequenceReader<T>(this ReadOnlySequence<T> sequence) where T : unmanaged, IEquatable<T>
         {
             return new SequenceReader<T>(sequence);
@@ -562,7 +569,10 @@ namespace BrightData
             return buffer.ConvertUnmanagedTo(toType.GetDataType());
         }
 
-        static readonly HashSet<string> TrueStrings = ["Y", "YES", "TRUE", "T", "1"];
+        /// <summary>
+        /// Set of recognized boolean true string values used by <see cref="ToBoolean"/> for string-to-boolean conversion.
+        /// </summary>
+        private static readonly HashSet<string> TrueStrings = ["Y", "YES", "TRUE", "T", "1"];
 
         /// <summary>
         /// Creates a boolean read only buffer from this buffer
@@ -649,7 +659,7 @@ namespace BrightData
             if (buffer.DataType == typeof(DateTime))
                 return ((IReadOnlyBuffer<DateTime>)buffer).Map(DateTimeToTime);
             if (buffer.DataType == typeof(string))
-                buffer.ToStringBuffer().Map(StringToTime);
+                return buffer.ToStringBuffer().Map(StringToTime);
             return (IReadOnlyBuffer<TimeOnly>)buffer.ConvertUnmanagedTo(typeof(TimeOnly));
 
             static TimeOnly DateTimeToTime(DateTime date) => new(date.Hour, date.Minute, date.Second, date.Millisecond);
@@ -936,8 +946,10 @@ namespace BrightData
         {
             if (rowIndices.Length == 0) {
                 uint absoluteIndex = 0;
-                foreach (var (blockIndex, relativeBlockIndex) in AllIndices(buffer))
-                    yield return (absoluteIndex++, blockIndex, relativeBlockIndex, absoluteIndex++);
+                foreach (var (blockIndex, relativeBlockIndex) in AllIndices(buffer)) {
+                    yield return (absoluteIndex, blockIndex, relativeBlockIndex, absoluteIndex);
+                    ++absoluteIndex;
+                }
             }
             else {
                 foreach(var item in GetIndices(buffer, (IEnumerable<uint>)rowIndices))

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Numerics;
 using System.Threading;
@@ -11,33 +11,48 @@ namespace BrightData.LinearAlgebra.VectorIndexing.Storage
     {
         readonly ArrayBufferWriter<T> _data;
         readonly Lock _writeLock = new();
+        bool _disposed;
 
         public InMemoryVectorStorage(uint vectorSize, uint? capacity)
         {
             VectorSize = vectorSize;
             if (capacity.HasValue)
-                _data = new((int)(capacity.Value * vectorSize));
+                _data = new((int)checked(capacity.Value * vectorSize));
             else
                 _data = new();
         }
 
         public void Dispose()
         {
-            // nop
+            _disposed = true;
         }
 
         public VectorStorageType StorageType => VectorStorageType.InMemory;
         public uint VectorSize { get; }
         public uint Size => (uint)(_data.WrittenCount / VectorSize);
-        public ReadOnlySpan<T> this[uint index] => _data.WrittenSpan.Slice((int)(index * VectorSize), (int)VectorSize);
-        public ReadOnlyMemory<T> Get(uint index) => _data.WrittenMemory.Slice((int)(index * VectorSize), (int)VectorSize);
+        public ReadOnlySpan<T> this[uint index]
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return _data.WrittenSpan.Slice((int)(index * VectorSize), (int)VectorSize);
+            }
+        }
+
+        public ReadOnlyMemory<T> Get(uint index)
+        {
+            ThrowIfDisposed();
+            return _data.WrittenMemory.Slice((int)(index * VectorSize), (int)VectorSize);
+        }
 
         public uint Add(ReadOnlySpan<T> vector)
         {
+            ThrowIfDisposed();
             if (vector.Length != VectorSize)
                 throw new ArgumentException($"Expected vector to be size {VectorSize} but received {vector.Length}", nameof(vector));
 
-            lock (_writeLock) {
+            lock (_writeLock)
+            {
                 var index = Size;
                 var span = _data.GetSpan((int)VectorSize);
                 vector.CopyTo(span);
@@ -48,30 +63,37 @@ namespace BrightData.LinearAlgebra.VectorIndexing.Storage
 
         public void ForEach(IndexedSpanCallbackWithVectorIndex<T> callback, CancellationToken ct)
         {
-            if (Size < Consts.MinimumSizeForParallel) {
+            ThrowIfDisposed();
+            if (Size < Consts.MinimumSizeForParallel)
+            {
                 for (uint i = 0U, size = Size; i < size && !ct.IsCancellationRequested; i++)
                     callback(this[i], i);
             }
-            else {
-                Parallel.For(0, Size, new ParallelOptions {
-                    CancellationToken = ct
-                }, i => callback(this[(uint)i], (uint)i));
+            else
+            {
+                Parallel.For(0, Size, new ParallelOptions { CancellationToken = ct }, i => callback(this[(uint)i], (uint)i));
             }
         }
 
         public unsafe void ForEach(ReadOnlySpan<uint> indices, IndexedSpanCallbackWithVectorIndexAndRelativeIndex<T> callback)
         {
+            ThrowIfDisposed();
             var len = indices.Length;
-            if (len < Consts.MinimumSizeForParallel) {
-                for (var i = 0U; i < len; i++) {
+            if (len < Consts.MinimumSizeForParallel)
+            {
+                for (var i = 0U; i < len; i++)
+                {
                     var vectorIndex = indices[(int)i];
                     callback(this[vectorIndex], vectorIndex, i);
                 }
             }
-            else {
-                fixed (uint* indexPtr = indices) {
+            else
+            {
+                fixed (uint* indexPtr = indices)
+                {
                     var index = indexPtr;
-                    Parallel.For(0, len, i => {
+                    Parallel.For(0, len, i =>
+                    {
                         var vectorIndex = index[i];
                         callback(this[vectorIndex], vectorIndex, (uint)i);
                     });
@@ -81,11 +103,18 @@ namespace BrightData.LinearAlgebra.VectorIndexing.Storage
 
         public ReadOnlyMemory<T>[] GetAll()
         {
+            ThrowIfDisposed();
             var size = Size;
             var ret = new ReadOnlyMemory<T>[size];
-            for(var i = 0U; i < size; i++)
+            for (var i = 0U; i < size; i++)
                 ret[i] = Get(i);
             return ret;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(InMemoryVectorStorage<T>));
         }
     }
 }

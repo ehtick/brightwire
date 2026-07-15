@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/jdermody/brightwire</RepositoryUrl>
     <PackageProjectUrl>https://github.com/jdermody/brightwire</PackageProjectUrl>
     <Description>Cuda provider for Bright Data - allows GPU computation on NVIDIA GPUs</Description>
-    <Copyright>Copyright © Jack Dermody 2016-2024</Copyright>
+    <Copyright>Copyright © Jack Dermody 2016-2026</Copyright>
     <PackageTags>cuda gpu</PackageTags>
     <PackageIcon>bw_favicon.png</PackageIcon>
     <PackageReleaseNotes>performance refactor</PackageReleaseNotes>

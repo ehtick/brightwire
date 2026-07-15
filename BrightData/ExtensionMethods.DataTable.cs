@@ -37,13 +37,17 @@ namespace BrightData
             {
                 BrightDataType.Boolean           => typeof(bool),
                 BrightDataType.SByte             => typeof(sbyte),
+                BrightDataType.Byte              => typeof(byte),
                 BrightDataType.Date              => typeof(DateTime),
                 BrightDataType.Double            => typeof(double),
                 BrightDataType.Decimal           => typeof(decimal),
                 BrightDataType.Float             => typeof(float),
                 BrightDataType.Short             => typeof(short),
+                BrightDataType.UShort            => typeof(ushort),
                 BrightDataType.Int               => typeof(int),
+                BrightDataType.UInt              => typeof(uint),
                 BrightDataType.Long              => typeof(long),
+                BrightDataType.ULong             => typeof(ulong),
                 BrightDataType.Unknown           => null,
                 BrightDataType.String            => typeof(string),
                 BrightDataType.IndexList         => typeof(IndexList),
@@ -174,11 +178,15 @@ namespace BrightData
         /// <returns></returns>
         public static bool IsInteger(this BrightDataType type) => type switch
         {
-            BrightDataType.SByte => true,
-            BrightDataType.Short => true,
-            BrightDataType.Int   => true,
-            BrightDataType.Long  => true,
-            _                    => false
+            BrightDataType.SByte  => true,
+            BrightDataType.Byte   => true,
+            BrightDataType.Short  => true,
+            BrightDataType.UShort => true,
+            BrightDataType.Int    => true,
+            BrightDataType.UInt   => true,
+            BrightDataType.Long   => true,
+            BrightDataType.ULong  => true,
+            _                     => false
         };
 
         /// <summary>
@@ -253,9 +261,13 @@ namespace BrightData
                 BrightDataType.Float      => StaticAnalysers.CreateNumericAnalyser<float>(writeCount),
                 BrightDataType.Decimal    => StaticAnalysers.CreateNumericAnalyserConvertToDouble<decimal>(writeCount),
                 BrightDataType.SByte      => StaticAnalysers.CreateNumericAnalyserConvertToDouble<sbyte>(writeCount),
-                BrightDataType.Int        => StaticAnalysers.CreateNumericAnalyserConvertToDouble<int>(writeCount),
-                BrightDataType.Long       => StaticAnalysers.CreateNumericAnalyserConvertToDouble<long>(writeCount),
+                BrightDataType.Byte       => StaticAnalysers.CreateNumericAnalyserConvertToDouble<byte>(writeCount),
                 BrightDataType.Short      => StaticAnalysers.CreateNumericAnalyserConvertToDouble<short>(writeCount),
+                BrightDataType.UShort     => StaticAnalysers.CreateNumericAnalyserConvertToDouble<ushort>(writeCount),
+                BrightDataType.Int        => StaticAnalysers.CreateNumericAnalyserConvertToDouble<int>(writeCount),
+                BrightDataType.UInt       => StaticAnalysers.CreateNumericAnalyserConvertToDouble<uint>(writeCount),
+                BrightDataType.Long       => StaticAnalysers.CreateNumericAnalyserConvertToDouble<long>(writeCount),
+                BrightDataType.ULong      => StaticAnalysers.CreateNumericAnalyserConvertToDouble<ulong>(writeCount),
                 BrightDataType.Date       => StaticAnalysers.CreateDateAnalyser(),
                 BrightDataType.BinaryData => StaticAnalysers.CreateFrequencyAnalyser<BinaryData>(writeCount),
                 BrightDataType.DateOnly   => StaticAnalysers.CreateFrequencyAnalyser<DateOnly>(writeCount),
@@ -410,17 +422,18 @@ namespace BrightData
 
             var vectoriser = await GetVectoriser(featureColumns, oneHotEncode);
             var targetColumn = target.HasValue ? dataTable.GetColumn(target.Value).ToStringBuffer() : null;
-            uint blockIndex = 0;
+            uint rowIndex = 0;
             await foreach (var blockData in vectoriser.Vectorise(featureColumns)) {
                 var blockMemory = new Memory2D<float>(blockData);
                 var len = blockMemory.Height;
-                var targetBlock = targetColumn is null 
-                    ? null 
-                    : await targetColumn.GetTypedBlock(blockIndex++);
-                for (var i = 0; i < len; i++) {
-                    var memory = blockMemory.Span.GetRowSpan(i).ToArray();
-                    yield return (new ReadOnlyTensorSegment<float>(memory), targetColumn is null ? null : targetBlock.Span[i]);
+                for (uint i = 0; i < len; i++) {
+                    var memory = blockMemory.Span.GetRowSpan((int)i).ToArray();
+                    var label = targetColumn is null 
+                        ? null 
+                        : await targetColumn.GetItem(rowIndex + i);  // row-indexed access
+                    yield return (new ReadOnlyTensorSegment<float>(memory), label);
                 }
+                rowIndex += (uint)len;
             }
         }
 
@@ -1088,16 +1101,16 @@ namespace BrightData
         /// <returns></returns>
         public static async Task<IDataTable> Convert(this IDataTable dataTable, string? filePath, params ColumnConversionInfo[] conversions)
         {
-            var newColumnTable = conversions
-                .Select(x => (Index: x.ColumnIndex, Task: x.Convert(dataTable)))
-                .ToDictionary(x => x.Index, x => x.Task);
+            var tasks = conversions.Select(async c => (c.ColumnIndex, Result: await c.Convert(dataTable)));
+            var results = await Task.WhenAll(tasks);
+            var newColumnTable = results.ToDictionary(x => x.ColumnIndex, x => x.Result);
 
             using var tempStream = dataTable.Context.CreateTempDataBlockProvider();
             var writer = new ColumnOrientedDataTableBuilder(dataTable.Context, tempStream);
             var columns = new IReadOnlyBufferWithMetaData[dataTable.ColumnCount];
             for (uint i = 0; i < dataTable.ColumnCount; i++) {
                 if (newColumnTable.TryGetValue(i, out var newColumn))
-                    writer.CreateColumn(columns[i] = await newColumn);
+                    writer.CreateColumn(columns[i] = newColumn);
                 else {
                     writer.CreateColumn(columns[i] = dataTable.GetColumn(i));
                 }

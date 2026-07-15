@@ -769,15 +769,15 @@ namespace BrightData
         /// <param name="scalar"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static MemoryOwner<T> SubtractInPlace<T>(
+        public static void SubtractInPlace<T>(
             this Span<T> span,
             T scalar
         ) where T : unmanaged, INumber<T>
         {
             var scalarVector = new Vector<T>(scalar);
-            return TransformVectorized(
+            MutateInPlaceVectorized(
                 span,
-                (in Vector<T> a, out Vector<T> r) => r = a - scalarVector,
+                (in a, out r) => r = a - scalarVector,
                 a => a - scalar
             );
         }
@@ -1800,7 +1800,7 @@ namespace BrightData
         {
             var index = span.BinarySearch(comparator);
             if (index >= 0) {
-                int first = index, last = index;
+                int first = index, last = index+1;
                 while (first >= 1 && comparator.CompareTo(span[first - 1]) == 0)
                     --first;
                 while (last >= 0 && last < span.Length - 1 && comparator.CompareTo(span[last + 1]) == 0)
@@ -1830,7 +1830,7 @@ namespace BrightData
                 int first = index, last = index+1;
                 while (first >= 1 && comparator.CompareTo(span[first - 1]) == 0)
                     --first;
-                while (last >= 0 && last < span.Length - 1 && comparator.CompareTo(span[last + 1]) == 0)
+                while (last < span.Length && comparator.CompareTo(span[last]) == 0)
                     ++last;
                 return span[first..last];
             }

@@ -5,8 +5,13 @@ using System.Numerics;
 
 namespace BrightData.LinearAlgebra.VectorIndexing.IndexStrategy
 {
-    internal class PreCalculatedEmbeddingVectorIndex<T>(IStoreVectors<T> storage, IMatrix<T> weights, IVector<T> bias, DistanceMetric distanceMetric, uint? capacity)
-        : IVectorIndex<T>
+    internal class PreCalculatedEmbeddingVectorIndex<T>(
+        IStoreVectors<T> storage, 
+        IMatrix<T> weights, 
+        IVector<T> bias, 
+        DistanceMetric distanceMetric, 
+        uint? capacity
+    ) : IVectorIndex<T>
         where T : unmanaged, IBinaryFloatingPointIeee754<T>, IMinMaxValue<T>
     {
         readonly FlatVectorIndex<T> _embeddingIndex = new(new InMemoryVectorStorage<T>(weights.ColumnCount, capacity), distanceMetric);
