@@ -41,21 +41,21 @@ namespace ExampleCode
             else
                 PerformanceTest.Run(new LinearAlgebraProvider<float>(context));
 
-            // await Xor(context, useMkl);
-            // await IrisClassification(context, useMkl);
-            // await IrisClustering(context, useMkl);
-            // await MarkovChains(context, useMkl);
-            // await TextClustering(context, useMkl);
-            // await IntegerAddition(context, useMkl);
-            // await ReberPrediction(context, useMkl);
-            // await OneToMany(context, useMkl);
-            // await ManyToOne(context, useMkl);
-            // await SequenceToSequence(context, useMkl);
-            // await StockData(context, useMkl, useCuda);
-            // await PredictBicyclesWithNeuralNetwork(context, useMkl);
-            // await MultiLabelSingleClassifier(context, useMkl);
-            // await MultiLabelMultiClassifiers(context, useMkl);
-            // await MnistFeedForward(context, useMkl);
+            await Xor(context, useMkl);
+            await IrisClassification(context, useMkl);
+            await IrisClustering(context, useMkl);
+            await MarkovChains(context, useMkl);
+            await TextClustering(context, useMkl);
+            await IntegerAddition(context, useMkl);
+            await ReberPrediction(context, useMkl);
+            await OneToMany(context, useMkl);
+            await ManyToOne(context, useMkl);
+            await SequenceToSequence(context, useMkl);
+            await StockData(context, useMkl, useCuda);
+            await PredictBicyclesWithNeuralNetwork(context, useMkl);
+            await MultiLabelSingleClassifier(context, useMkl);
+            await MultiLabelMultiClassifiers(context, useMkl);
+            await MnistFeedForward(context, useMkl);
             await MnistConvolutional(context, useMkl, useCuda);
             await TrainIncomePrediction(context, useMkl);
             await SentimentClassification(context, useMkl);

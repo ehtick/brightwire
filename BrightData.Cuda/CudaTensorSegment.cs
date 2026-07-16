@@ -115,7 +115,7 @@ namespace BrightData.Cuda
         }
         public unsafe void CopyTo(float* destination, int offset, int stride, int count)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("Direct pointer copy is not supported for CUDA segments");
         }
 
         public IHaveReadOnlyContiguousMemory<float>? Contiguous => null;

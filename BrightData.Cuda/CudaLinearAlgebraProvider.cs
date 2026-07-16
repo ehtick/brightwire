@@ -187,7 +187,7 @@ namespace BrightData.Cuda
         public override float DotProduct(IReadOnlyNumericSegment<float> tensor, IReadOnlyNumericSegment<float> tensor2)
         {
             float ret = 0;
-            CudaBlasNativeMethods.cublasSdot_v2_64(Provider.Blas, tensor.Size, tensor.GetDevicePointer(), 1, tensor2.GetDevicePointer(), 1, ref ret);
+            CudaBlasNativeMethods.cublasSdot_v2_64(Provider.Blas, tensor.Size, tensor.GetDevicePointer(), 1, tensor2.GetDevicePointer(), 1, ref ret).CheckResult();
             return ret;
         }
 
@@ -208,7 +208,7 @@ namespace BrightData.Cuda
             ret.DeviceMemory.CopyToDevice(tensor2.GetDeviceMemoryPtr());
 
             float alpha = 1;
-            CudaBlasNativeMethods.cublasSaxpy_v2_64(Provider.Blas, size, ref alpha, tensor.GetDevicePointer(), 1, ret.DeviceMemory.DevicePointer, 1);
+            CudaBlasNativeMethods.cublasSaxpy_v2_64(Provider.Blas, size, ref alpha, tensor.GetDevicePointer(), 1, ret.DeviceMemory.DevicePointer, 1).CheckResult();
             return ret;
         }
 
@@ -298,7 +298,7 @@ namespace BrightData.Cuda
         public override float L2Norm(IReadOnlyNumericSegment<float> segment) // => Provider.Blas.Norm2(GetDeviceVariable(segment), 1);
         {
             var result = 0f;
-            CudaBlasNativeMethods.cublasSnrm2_v2(Provider.Blas, (int)segment.Size, segment.GetDevicePointer(), 1, ref result);
+            CudaBlasNativeMethods.cublasSnrm2_v2(Provider.Blas, (int)segment.Size, segment.GetDevicePointer(), 1, ref result).CheckResult();
             return result;
         }
 
@@ -309,7 +309,7 @@ namespace BrightData.Cuda
             var ret = (CudaTensorSegment)CreateSegment(size, false);
             ret.DeviceMemory.CopyToDevice(tensor1.GetDeviceMemoryPtr());
             var alpha = -1f;
-            CudaBlasNativeMethods.cublasSaxpy_v2(Provider.Blas, (int)size, ref alpha, tensor2.GetDevicePointer(), 1, ret.DeviceMemory.DevicePointer, 1);
+            CudaBlasNativeMethods.cublasSaxpy_v2(Provider.Blas, (int)size, ref alpha, tensor2.GetDevicePointer(), 1, ret.DeviceMemory.DevicePointer, 1).CheckResult();
             return ret;
         }
 
@@ -434,10 +434,11 @@ namespace BrightData.Cuda
         public override INumericSegment<float> Softmax(IReadOnlyNumericSegment<float> tensor) => Softmax(tensor.GetDeviceMemoryPtr(), 1);
         CudaTensorSegment Softmax(IDeviceMemoryPtr ptr, uint stride, CuStream* stream = null)
         {
+            const float softmaxThreshold = 1e-6f;
             var max = Provider.FindMinAndMax(ptr, ptr.Size, stride, stream).Max;
             var softmax = Provider.SoftmaxVector(ptr, ptr.Size, max, stride, stream);
             var softmaxSum = Provider.SumValues(softmax, ptr.Size, 1, stream);
-            if (Math<float>.IsNotZero(softmaxSum))
+            if (softmaxSum > softmaxThreshold)
                 Provider.ScaleInPlace(softmax, softmax.Size, 1f / softmaxSum, 1, stream);
             return CreateCudaTensorSegment(softmax);
         }

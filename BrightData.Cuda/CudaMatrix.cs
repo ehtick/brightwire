@@ -56,7 +56,7 @@ namespace BrightData.Cuda
                 (int)ColumnCount,
                 ret.DevicePointer,
                 (int)ColumnCount
-            );
+            ).CheckResult();
             return Lap.CreateMatrix(ColumnCount, RowCount, new CudaTensorSegment(ret, Provider));
         }
 
@@ -72,7 +72,7 @@ namespace BrightData.Cuda
             CudaBlasNativeMethods.cublasSgemv_v2(Provider.Blas,
                 Operation.NonTranspose,
                 size,
-                size,
+                (int)ColumnCount,
                 ref alpha,
                 matrixPtr.DevicePointer,
                 size,
@@ -176,7 +176,7 @@ namespace BrightData.Cuda
                     incx: (int)RowCount,
                     y: ret.DevicePointer + (offset * CudaProvider.FloatSize),
                     incy: indices.Count
-                );
+                ).CheckResult();
                 offset += 1;
             }
             return Lap.CreateMatrix((uint)indices.Count, ColumnCount, Lap.CreateCudaTensorSegment(ret));
@@ -203,7 +203,7 @@ namespace BrightData.Cuda
                 ref beta,
                 ret.DevicePointer,
                 rowsA
-            );
+            ).CheckResult();
             return Lap.CreateMatrix(RowCount, other.ColumnCount, Lap.CreateCudaTensorSegment(ret));
         }
 
@@ -228,7 +228,7 @@ namespace BrightData.Cuda
                 ref beta,
                 ret.DevicePointer,
                 rowsA
-            );
+            ).CheckResult();
             return Lap.CreateMatrix(RowCount, other.RowCount, Lap.CreateCudaTensorSegment(ret));
         }
 
@@ -253,7 +253,7 @@ namespace BrightData.Cuda
                 ref beta,
                 ret.DevicePointer,
                 columnsA
-            );
+            ).CheckResult();
             return Lap.CreateMatrix(ColumnCount, other.ColumnCount, Lap.CreateCudaTensorSegment(ret));
         }
 

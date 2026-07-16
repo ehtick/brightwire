@@ -17,7 +17,7 @@ namespace BrightData.Cuda.Helper
         /// CUDA device variable
         /// </summary>
         protected CudaDeviceVariable<float> _data;
-        bool _disposed = false;
+        int _disposedFlag = 0;
         int _refCount = 0;
 
         static long _nextIndex = 0;
@@ -45,7 +45,7 @@ namespace BrightData.Cuda.Helper
 #if DEBUG
         ~DeviceMemoryBlockBase()
         {
-            if (!_disposed)
+            if (_disposedFlag == 0)
                 Debug.WriteLine($"\tMemory Block {Index} was not disposed - {_data.SizeInBytes} bytes leaked in the GPU !!");
         }
 
@@ -73,7 +73,7 @@ namespace BrightData.Cuda.Helper
         public long Index { get; }
 
         /// <inheritdoc />
-        public bool IsValid => !_disposed;
+        public bool IsValid => _disposedFlag == 0;
 
         /// <summary>
         /// Called when the block has been disposed
@@ -84,9 +84,8 @@ namespace BrightData.Cuda.Helper
         public int Release()
         {
             var ret = Interlocked.Decrement(ref _refCount);
-            if (ret <= 0 && !_disposed) {
+            if (ret <= 0 && Interlocked.CompareExchange(ref _disposedFlag, 1, 0) == 0) {
                 OnDispose();
-                _disposed = true;
 #if DEBUG
                 GC.SuppressFinalize(this);
                 if (Index == _badDispose)
@@ -147,7 +146,7 @@ namespace BrightData.Cuda.Helper
         /// <inheritdoc />
         public virtual void CopyToHost(float[] target)
         {
-            DriverApiNativeMethods.SynchronousMemcpyV2.cuMemcpyDtoH_v2(target, DevicePointer, Math.Min(Size, target.Length) * sizeof(float));
+            DriverApiNativeMethods.SynchronousMemcpyV2.cuMemcpyDtoH_v2(target, DevicePointer, Math.Min(Size, target.Length) * sizeof(float)).CheckResult();
             //_data.CopyToHost(target);
         }
 
@@ -156,7 +155,7 @@ namespace BrightData.Cuda.Helper
         {
             fixed (float* p = &target.Array![0]) {
                 var ptr = p + target.Offset * sizeof(float);
-                DriverApiNativeMethods.SynchronousMemcpyV2.cuMemcpyDtoH_v2((IntPtr)ptr, DevicePointer, Math.Min(Size, target.Count) * sizeof(float));
+                DriverApiNativeMethods.SynchronousMemcpyV2.cuMemcpyDtoH_v2((IntPtr)ptr, DevicePointer, Math.Min(Size, target.Count) * sizeof(float)).CheckResult();
             }
             //_data.CopyToHost(target.Array!, 0, target.Offset, target.Count * sizeof(float));
         }
@@ -164,7 +163,7 @@ namespace BrightData.Cuda.Helper
         /// <inheritdoc />
         public virtual void Clear()
         {
-            DriverApiNativeMethods.Memset.cuMemsetD8_v2(DevicePointer, 0, Size * sizeof(float));
+            DriverApiNativeMethods.Memset.cuMemsetD8_v2(DevicePointer, 0, Size * sizeof(float)).CheckResult();
             //if(Size % 2 == 0)
             //    DriverAPINativeMethods.Memset.cuMemsetD32_v2(DevicePointer, 0, Size / 2).CheckResult();
             //else
